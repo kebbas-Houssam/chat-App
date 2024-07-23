@@ -1,4 +1,5 @@
 import 'package:chatapp/screens/chat_screen.dart';
+import 'package:chatapp/screens/home_page.dart';
 import 'package:chatapp/widgets/MyButton.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -89,7 +90,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   try {
                         final user = await _auth.signInWithEmailAndPassword(email: email, password: password);
                         if (user != null){
-                        Navigator.pushNamed(context, ChatScreen.ScreenRoute);
+                        Navigator.pushNamed(context, HomePage.screenRoute);
                         setState(() {
                           spinner = false;
                         });

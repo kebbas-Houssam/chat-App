@@ -1,7 +1,9 @@
+import 'package:chatapp/screens/home_page.dart';
 import 'package:chatapp/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
 
 
 
@@ -10,9 +12,10 @@ late User signInUser;
 
 
 class ChatScreen extends StatefulWidget {
+
   static const String ScreenRoute = 'chat_screen';
 
-  const ChatScreen({super.key});
+  // const ChatScreen({super.key, required String data});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -22,6 +25,8 @@ class _ChatScreenState extends State<ChatScreen> {
   final messageTextController = TextEditingController();
   final _auth = FirebaseAuth.instance;
   String? messageText;
+  
+  
   @override
   void initState() {
     super.initState();
@@ -47,97 +52,110 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void getMessagesStreams() async {
-    await for (var snapshot in _firestore.collection('messages').snapshots()) {
-      for (var msg in snapshot.docs) {
-        print(msg.data());
-      }
-    }
-  }
-
+  // void getMessagesStreams() async {
+  //   await for (var snapshot in _firestore.collection('messages').snapshots()) {
+  //     for (var msg in snapshot.docs) {
+  //       print(msg.data());
+  //     }
+  //   }
+  // }
+  late String data ;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.redAccent[400]!,
-        title: Row(
-          children: [
-            Container(
-              height: 32,
-              child: Image.asset('images/image.png'),
-            ),
-            SizedBox(
-              width: 15,
-            ),
-            Text('Chat Screen',
-                style: TextStyle(
+    
+    final args = ModalRoute.of(context)?.settings.arguments ;
+    if (args is String) {
+      data = args;
+    } else {
+      data = 'Default Value'; 
+    }
+    return Provider<String>(
+      create : (context)=> data ,
+      child: Scaffold(
+        appBar: AppBar(
+          
+          backgroundColor: Colors.redAccent[400]!,
+          title: Row(
+            children: [
+              Container(
+                height: 32,
+                child: Image.asset('images/image.png'),
+              ),
+              SizedBox(
+                width: 15,
+              ),
+              Text('Chat Screen ',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 24,
+                  )),
+            ],
+          ),
+          actions: [
+            IconButton(
+                onPressed: () {
+                  _auth.signOut();
+                  Navigator.pushNamed(context, WelcomeScreen.ScreenRoute);
+                  
+                },
+                icon: Icon(
+                  Icons.close,
                   color: Colors.white,
-                  fontSize: 24,
                 )),
           ],
         ),
-        actions: [
-          IconButton(
-              onPressed: () {
-                _auth.signOut();
-                Navigator.pushNamed(context, WelcomeScreen.ScreenRoute);
-                
-              },
-              icon: Icon(
-                Icons.close,
-                color: Colors.white,
-              )),
-        ],
-      ),
-      body: SafeArea(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-          MessageStreamBuilder(),
-          Container(
-              decoration: BoxDecoration(
-                  border: Border(
-                      top: BorderSide(
-                color: Colors.redAccent[400]!,
-                width: 2,
-              ))),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Expanded(
-                      child: TextField(
-                        controller: messageTextController,
-                    onChanged: (value) {
-                      messageText = value;
-                    },
-                    decoration: InputDecoration(
-                        contentPadding:
-                            EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                        hintText: 'your message here...',
-                        border: InputBorder.none),
-                  )),
-                  TextButton(
-                      onPressed: () {
-                        messageTextController.clear();
-                       _firestore.collection('messages').add({
-                          'sender': signInUser.email,
-                          'text': messageText,
-                          'time' : FieldValue.serverTimestamp() ,
-                        });
+        body: SafeArea(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+            Text(data),
+            MessageStreamBuilder(),
+            Container(
+                decoration: BoxDecoration(
+                    border: Border(
+                        top: BorderSide(
+                  color: Colors.redAccent[400]!,
+                  width: 2,
+                ))),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Expanded(
+                        child: TextField(
+                          controller: messageTextController,
+                      onChanged: (value) {
+                        messageText = value;
                       },
-                      child: Text(
-                        'send',
-                        style: TextStyle(
-                          color: Colors.orange[700]!,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ))
-                ],
+                      decoration: InputDecoration(
+                          contentPadding:
+                              EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+                          hintText: 'your message here...',
+                          border: InputBorder.none),
+                    )),
+                    TextButton(
+                        onPressed: () {
+                          messageTextController.clear();
+                         _firestore.collection('messages').add({
+                            'sender': signInUser.uid,
+                            'text': messageText,
+                            'receiver' : data,
+                            'time' : FieldValue.serverTimestamp() ,
+                          });
+                        },
+                        child: Text(
+                          'send',
+                          style: TextStyle(
+                            color: Colors.orange[700]!,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ))
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -149,6 +167,7 @@ class MessageStreamBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final data = Provider.of<String>(context);
     return   StreamBuilder<QuerySnapshot>(
               stream: _firestore.collection('messages').orderBy('time').snapshots(), 
               builder: (context , snapshot){
@@ -164,15 +183,18 @@ class MessageStreamBuilder extends StatelessWidget {
                 final messages = snapshot.data!.docs.reversed;
 
                 for ( var msg in messages){
-                  
-                  final text = msg.get('text');
-                  final sender = msg.get('sender');
-                  final currentUser = signInUser.email;
+                  final sender = signInUser.uid;
+                  final receiver = data ;
 
-
-                  final messageWidget = MessageLine(text: text,sender : sender,isMe: currentUser == sender ,);
-                  messagesWidgets.add(messageWidget);
-                }
+                  if ((sender == msg.get('sender') && receiver == msg.get('receiver')) || ((sender == msg.get('receiver') && receiver == msg.get('sender')))){
+                    final text = msg.get('text');
+                    final messageWidget = MessageLine(text: text,isMe: sender == msg.get('sender') ,);
+                    messagesWidgets.add(messageWidget);
+                  }
+                  // final sender = msg.get('sender');
+                  // final receiver = msg.get('receiver');
+                  // final currentUser = signInUser.uid;
+                  }
                  return Expanded(
                    child: ListView(
                     reverse: true,
@@ -187,9 +209,8 @@ class MessageStreamBuilder extends StatelessWidget {
 
 
 class MessageLine extends StatelessWidget {
-  const MessageLine({required this.text , required this.sender ,required this.isMe , super.key});
-
-  final String sender;
+  const MessageLine({required this.text  ,required this.isMe , super.key});
+  
   final String text;
   final bool isMe;
   @override
@@ -199,7 +220,7 @@ class MessageLine extends StatelessWidget {
       child: Column(
         crossAxisAlignment:isMe? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: [
-          Text(sender , style: TextStyle(color: Colors.grey[600] , fontSize: 12),),
+          // Text(sender , style: TextStyle(color: Colors.grey[600] , fontSize: 12),),
           SizedBox(height: 5,) ,
           Material(
             elevation: 5 ,

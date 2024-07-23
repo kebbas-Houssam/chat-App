@@ -1,4 +1,5 @@
 import 'package:chatapp/screens/chat_screen.dart';
+import 'package:chatapp/screens/home_page.dart';
 import 'package:chatapp/screens/login_screen.dart';
 import 'package:chatapp/screens/signup_screen.dart';
 import 'package:flutter/material.dart';
@@ -26,16 +27,20 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      //home: ChatScreen(),
+      // home: HomePage(),
       initialRoute: _auth.currentUser != null 
-      ? ChatScreen.ScreenRoute 
+      ? HomePage.screenRoute
       : WelcomeScreen.ScreenRoute,
+
+
       routes: {
         WelcomeScreen.ScreenRoute:(context) => WelcomeScreen(),
         LoginScreen.ScreenRoute:(context) => LoginScreen(),
         SignupScreen.ScreenRoute:(context) => SignupScreen(),
         ChatScreen.ScreenRoute:(context) => ChatScreen(),
+        HomePage.screenRoute:(context) => HomePage(),
 
+        
       }
     );
   }
