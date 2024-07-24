@@ -2,6 +2,7 @@ import 'package:chatapp/screens/chat_screen.dart';
 import 'package:chatapp/screens/home_page.dart';
 import 'package:chatapp/screens/login_screen.dart';
 import 'package:chatapp/screens/signup_screen.dart';
+import 'package:chatapp/widgets/Navigationbar.dart';
 import 'package:flutter/material.dart';
 import 'screens/welcome_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -29,7 +30,7 @@ class MyApp extends StatelessWidget {
       ),
       // home: HomePage(),
       initialRoute: _auth.currentUser != null 
-      ? HomePage.screenRoute
+      ? Navigationbar.ScreenRoute
       : WelcomeScreen.ScreenRoute,
 
 
@@ -39,6 +40,7 @@ class MyApp extends StatelessWidget {
         SignupScreen.ScreenRoute:(context) => SignupScreen(),
         ChatScreen.ScreenRoute:(context) => ChatScreen(),
         HomePage.screenRoute:(context) => HomePage(),
+        Navigationbar.ScreenRoute :(context) => Navigationbar(),
 
         
       }

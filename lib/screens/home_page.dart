@@ -3,6 +3,8 @@ import 'package:chatapp/screens/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'chats_screen.dart';
+import 'profile_screen.dart';
 
 final _firestore = FirebaseFirestore.instance;
 final _auth = FirebaseAuth.instance;
@@ -21,6 +23,9 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   String? userName;
+  
+    //bottom Navigation bar pages 
+
 
   @override
   void initState() {
@@ -46,14 +51,15 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    
     return Scaffold(
+  
       appBar: AppBar(
         title: const Text('Home'),
       ),
       body: SafeArea(
         child: Center(
-          child: UsersWidget(),
-          
+          child: UsersWidget(),      
         ),
       ),
     );

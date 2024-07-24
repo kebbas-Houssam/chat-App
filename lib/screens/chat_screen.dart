@@ -92,16 +92,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
           actions: [
-            IconButton(
-                onPressed: () {
-                  _auth.signOut();
-                  Navigator.pushNamed(context, WelcomeScreen.ScreenRoute);
-                  
-                },
-                icon: Icon(
-                  Icons.close,
-                  color: Colors.white,
-                )),
+            
           ],
         ),
         body: SafeArea(
