@@ -120,10 +120,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     
                     final newUser = await _auth.createUserWithEmailAndPassword(
                     email: email, password: password);
-                    _firestore.collection('users').add({
-                       'uid' : _auth.currentUser?.uid,
+                    _firestore.collection('users').doc(_auth.currentUser?.uid).set({
                        'name' : name,
-                       'email' : email
+                       'email' : email,
+                       'profilePicture' : '' ,
+                       'createdAt' : FieldValue.serverTimestamp()
                     });
                     Navigator.pushNamed(context, Navigationbar.ScreenRoute);
                     setState(() {

@@ -30,33 +30,15 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    setUserName();
+    
   }
 
-  Future<void> setUserName() async {
-    
-    if (currentUser != null) {
-      final users = await _firestore.collection('users').get();
-      for (var user in users.docs) {
-        if (user.get('uid') == currentUser?.uid) {
-          setState(() {
-            userName = user.get('name');
-          });
-          print(userName);
-          break;
-        }
-      }
-    }
-  }
+  
 
   @override
   Widget build(BuildContext context) {
     
     return Scaffold(
-  
-      appBar: AppBar(
-        title: const Text('Home'),
-      ),
       body: SafeArea(
         child: Center(
           child: UsersWidget(),      
@@ -88,10 +70,10 @@ class UsersWidget extends StatelessWidget {
 
         List<UserLine> usersNames = [];
         for (var user in snapshot.data!.docs) {
-          if (_auth.currentUser?.uid != user.get('uid')){
+          if (_auth.currentUser?.uid != user.id){
               final userName = user.get('name');
-              final uid = user.get('uid');
-              final userWidget = UserLine(user: userName , uid : uid );
+              final imageUrl = user.get('profilePicture');
+              final userWidget = UserLine(user: userName , uid : user .id , image : imageUrl );
               usersNames.add(userWidget);
           }
           
@@ -110,24 +92,21 @@ class UsersWidget extends StatelessWidget {
 }
 
 class UserLine extends StatelessWidget {
-  const UserLine({super.key, required this.user , required this.uid });
+  const UserLine({super.key, required this.user , required this.image, required this.uid });
   final String user;
   final String uid;
+  final String image;
   @override
   Widget build(BuildContext context) {
     //add user image
     return Row(
       children: [
-       
+      
         Padding(
-          padding: const EdgeInsets.only(top: 20 , left: 20),
+          padding: const EdgeInsets.only(  left: 20),
           child: Material(
-            elevation: 5,
-            borderRadius: BorderRadius.all(Radius.circular(15)),
-            color: Colors.amber[600],
             child: Padding(
-              
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 15),
+              padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
               child: MaterialButton(
                 onPressed: () {
                   Navigator.pushNamed(context, ChatScreen.ScreenRoute,
@@ -136,9 +115,50 @@ class UserLine extends StatelessWidget {
                   : 'default'   );
                   
                 },
-                child: Text(
-                  '$user',
-                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                
+                child: Row(
+                  children: [
+                    Container(
+                      padding: EdgeInsets.all(2), // Thickness of the border
+                        decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Color(0xff604CD4),),
+                      child: CircleAvatar(
+                          foregroundColor: Colors.amber,
+                          
+                          radius: 20,
+                          backgroundColor: Colors.grey[300],
+                          backgroundImage: image != null ? NetworkImage(image) : null,
+                          child: image == null
+                              ? Icon(
+                                  Icons.account_circle,
+                                  size: 20,
+                                  color: Colors.grey,
+                                )
+                              : null,
+                        ),
+                    ),
+                      SizedBox(width: 20,),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '$user',
+                          style: const TextStyle(
+                            color: Colors.black,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold),
+                        ),
+                        Text('Hi Hellooooo',
+                              style: TextStyle(
+                              color: Colors.grey[400],
+                              fontSize: 12,
+                              fontWeight: FontWeight.normal),
+                              
+                              )
+                      ],
+                    ),
+                  ],
                 ),
               ),
               

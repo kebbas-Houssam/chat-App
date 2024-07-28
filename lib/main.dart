@@ -1,6 +1,8 @@
 import 'package:chatapp/screens/chat_screen.dart';
+import 'package:chatapp/screens/chats_screen.dart';
 import 'package:chatapp/screens/home_page.dart';
 import 'package:chatapp/screens/login_screen.dart';
+import 'package:chatapp/screens/profile_screen.dart';
 import 'package:chatapp/screens/signup_screen.dart';
 import 'package:chatapp/widgets/Navigationbar.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +10,7 @@ import 'screens/welcome_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'screens/edit_user_information.dart';
 
 
 void main() async{
@@ -28,7 +31,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      // home: HomePage(),
+      //  home: ChatsScreen(),
       initialRoute: _auth.currentUser != null 
       ? Navigationbar.ScreenRoute
       : WelcomeScreen.ScreenRoute,
@@ -41,6 +44,9 @@ class MyApp extends StatelessWidget {
         ChatScreen.ScreenRoute:(context) => ChatScreen(),
         HomePage.screenRoute:(context) => HomePage(),
         Navigationbar.ScreenRoute :(context) => Navigationbar(),
+        EditUser.ScreenRoute :(context) => EditUser(),
+        ChatsScreen.ScreenRoute : (context) => ChatsScreen(),
+        ProfileScreen.ScreenRoute: (context) => ProfileScreen(),
 
         
       }

@@ -1,4 +1,5 @@
 import 'package:chatapp/screens/chats_screen.dart';
+import 'package:chatapp/screens/groups_screen.dart';
 import 'package:chatapp/screens/home_page.dart';
 import 'package:chatapp/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
@@ -15,8 +16,7 @@ class _NavigationbarState extends State<Navigationbar> {
   int index = 0 ;
     final List <Widget> _pages = [
     ChatsScreen(),
-    HomePage(),
-    ProfileScreen()
+    GroupsScreen()
     
   ];
   @override
@@ -27,7 +27,7 @@ class _NavigationbarState extends State<Navigationbar> {
         onDestinationSelected: (index) => setState(()=> this.index = index ),
         destinations: [
           NavigationDestination(
-            icon: Icon(Icons.messenger_rounded), 
+            icon: Icon(Icons.messenger_outline_outlined), 
             selectedIcon: Icon(Icons.messenger_rounded),
             label: "chat",
             ),
@@ -36,11 +36,7 @@ class _NavigationbarState extends State<Navigationbar> {
             selectedIcon: Icon(Icons.people_alt_rounded),
             label: "people",
             ),
-            NavigationDestination(
-            icon: Icon(Icons.person_2_outlined), 
-            selectedIcon: Icon(Icons.person_2_rounded),
-            label: "profile",
-            ),
+          
         ],
       ),
       body: _pages[index],

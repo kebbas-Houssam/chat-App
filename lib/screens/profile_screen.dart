@@ -1,10 +1,15 @@
+import 'package:chatapp/screens/edit_user_information.dart';
 import 'package:chatapp/screens/welcome_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
+
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
-
+  static const String ScreenRoute = 'profile_screen';
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
 }
@@ -12,42 +17,109 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
-  late String userName = '' ;
+  Future<DocumentSnapshot>? _userFuture;
+  
   @override
   void initState() {
     super.initState();
-    setUserName();
+    _loadUserData();
   }
-
-  Future<void> setUserName() async {
+    void _loadUserData() {
+    _userFuture = _firestore.collection('users').doc(_auth.currentUser?.uid).get();
     
-    if (_auth.currentUser != null) {
-      final users = await _firestore.collection('users').get();
-      for (var user in users.docs) {
-        if (user.get('uid') == _auth.currentUser?.uid) {
-          setState(() {
-            userName = user.get('name');
-          });
-          print(userName);
-          break;
-        }
-      }
+  }
+  
+
+  //choise image from gallery 
+Future<XFile?> pickImage() async {
+  final ImagePicker picker = ImagePicker();
+  return await picker.pickImage(source: ImageSource.gallery);
+}
+ //upload image to firebase storage
+Future<String> uploadImage(XFile image) async {
+  File file = File(image.path);
+  try {
+    String fileName = 'user_images/${DateTime.now().millisecondsSinceEpoch}.png';
+    Reference ref = FirebaseStorage.instance.ref().child(fileName);
+    await ref.putFile(file);
+    return await ref.getDownloadURL();
+  } catch (e) {
+    print('Failed to upload image: $e');
+    return '';
+  }
+}
+//update user Image (database)
+Future<void> updateUserProfile(String imageUrl) async {
+  String userId = _auth.currentUser!.uid;
+  await _firestore.collection('users').doc(userId).update({
+    'profilePicture': imageUrl,
+  });
+}
+
+void pickAndUploadImage() async {
+  XFile? image = await pickImage();
+  if (image != null) {
+    String imageUrl = await uploadImage(image);
+    if (imageUrl.isNotEmpty) {
+      await updateUserProfile(imageUrl);
+      print('Profile picture updated successfully');
     }
   }
+}
+
+ Future<Map<String, dynamic>> getUserData() async {
+    try {
+      DocumentSnapshot<Map<String, dynamic>> userDoc = await _firestore
+          .collection('users')
+          .doc(_auth.currentUser?.uid)
+          .get();
+
+      if (userDoc.exists) {
+        return userDoc.data()!;
+      } else {
+        throw Exception('User not found');
+      }
+    } catch (e) {
+      throw Exception('Failed to load user data: $e');
+    }
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        
         actions: [
-          IconButton(
-                onPressed: () {
+          
+          PopupMenuButton(
+            onSelected: (String results){
+               switch(results){
+                case 'logout' : 
                   _auth.signOut();
-                  Navigator.pushNamed(context, WelcomeScreen.ScreenRoute);  
-                },
-                icon: Icon(
-                  Icons.logout_outlined,
-                  color: Colors.white,
-                )),
+                  Navigator.pushNamed(context, WelcomeScreen.ScreenRoute); 
+                  break; 
+                case 'edit Profile' :
+                  Navigator.pushNamed(context, EditUser.ScreenRoute,
+                  arguments: this._userFuture != null
+                  ? this._userFuture 
+                  : null   );
+                  break;
+               } 
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+              PopupMenuItem<String>(
+                value: 'edit Profile',
+                child: Text('edite Profile'),
+              ),
+              PopupMenuItem<String>(
+                value: 'logout',
+                child: Text('lougout'),
+              ),
+            ],
+          ),
+          
+
         ],
         backgroundColor: Colors.redAccent[400],
         title: Text('Profile' , style: TextStyle(color: Colors.white),),
@@ -56,7 +128,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             //add image 
-            Center(child: Text(userName , style: TextStyle(color: Colors.black),)),
+            FutureBuilder<Map<String, dynamic>>(
+              // future: _firestore.collection('users').doc(_auth.currentUser!.uid).get(), 
+              future: getUserData(), 
+              builder: (context , snapshot){
+                if (snapshot.connectionState == ConnectionState.waiting){
+                     return Center(child: CircularProgressIndicator(),);
+                }else if (snapshot.hasError){
+                  return Center(child: Text('ERROR : ${snapshot.error}'),);
+                }else if (!snapshot.hasData ){
+                  return Center(child : Text('user not found'));
+                }else {
+                  
+                 Map<String, dynamic> userData = snapshot.data!;
+                  
+                  
+                  String? imageUrl = userData['profilePicture'];
+                  print(imageUrl);
+                  return Center(
+                    child: Column(
+                      children: [
+
+                        CircleAvatar(
+                          radius:50,
+                          backgroundColor: Colors.grey[200],
+                          backgroundImage:  imageUrl != null && imageUrl.isNotEmpty 
+                          ? NetworkImage(imageUrl)
+                          : null ,
+                          child: imageUrl == null || imageUrl.isEmpty 
+                          ? Icon(Icons.account_circle ,
+                                  size: 100,
+                                  color: Colors.grey,)
+                          : null         ,
+                        ),
+                        
+                      SizedBox(height: 30,),
+                      Center(
+                        child : Text(
+                          '${userData['name']}',
+                          style: TextStyle(color: Colors.black , fontSize:35 ,),),
+                      )
+                      ],
+                    ),
+                  );
+                }
+              }
+              ),
+            IconButton(
+              onPressed: (){
+                pickAndUploadImage();
+              } ,
+              icon: Icon(Icons.add_a_photo)),
+            
           ],
         ),
       ),
