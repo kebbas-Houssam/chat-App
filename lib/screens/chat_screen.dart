@@ -1,5 +1,6 @@
 import 'package:chatapp/screens/home_page.dart';
 import 'package:chatapp/screens/welcome_screen.dart';
+import 'package:chatapp/services/user_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -60,91 +61,171 @@ class _ChatScreenState extends State<ChatScreen> {
   //   }
   // }
   late String data ;
+  
   @override
   Widget build(BuildContext context) {
     
     final args = ModalRoute.of(context)?.settings.arguments ;
     if (args is String) {
-      data = args;
+      data = args; // uid for the auther user  
     } else {
       data = 'Default Value'; 
     }
+
     return Provider<String>(
       create : (context)=> data ,
+      
       child: Scaffold(
-        appBar: AppBar(
-          
-          backgroundColor: Colors.redAccent[400]!,
-          title: Row(
-            children: [
-              Container(
-                height: 32,
-                child: Image.asset('images/image.png'),
+        backgroundColor: Colors.white ,
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(100),
+          child: Padding(
+            padding: const EdgeInsets.only(top : 20),
+            child: AppBar(
+              
+              // backgroundColor: Colors.redAccent[400]!,
+              title: FutureBuilder<Map<String, dynamic>>(
+              
+                future: getUserData(data),
+                builder: (context, snapshot) {
+              
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else if (!snapshot.hasData) {
+                    return Center(child: Text('User data not found'));
+                  } else {
+                    Map<String, dynamic> userData = snapshot.data!;
+                    String? imageUrl = userData['profilePicture'];
+              
+                    return 
+                       Row(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          
+                          Container(
+                            padding: EdgeInsets.all(3), // Thickness of the border
+                            decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Color(0xff604CD4),), // Border color
+                            child: CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.grey[300],
+                              backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
+                              child: imageUrl == null
+                                  ? Icon(
+                                      Icons.account_circle,
+                                      size: 20,
+                                      // color: Colors.grey,
+                                    )
+                                  : null,
+                            ),
+                          ),
+                          SizedBox(width: 20,),
+                       
+                          Column(
+                            
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${userData['name'] ?? 'User'}',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  color: Colors.black,
+                                   fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                        ],
+                         );
+                    
+                  }
+                },
               ),
-              SizedBox(
-                width: 15,
-              ),
-              Text('Chat Screen ',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                  )),
-            ],
+            ),
           ),
-          actions: [
-            
-          ],
         ),
         body: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
             Text(data),
             MessageStreamBuilder(),
-            Container(
-                decoration: BoxDecoration(
-                    border: Border(
-                        top: BorderSide(
-                  color: Colors.redAccent[400]!,
-                  width: 2,
-                ))),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                        child: TextField(
-                          controller: messageTextController,
-                      onChanged: (value) {
-                        messageText = value;
-                      },
-                      decoration: InputDecoration(
-                          contentPadding:
-                              EdgeInsets.symmetric(vertical: 10, horizontal: 20),
-                          hintText: 'your message here...',
-                          border: InputBorder.none),
-                    )),
-                    TextButton(
-                        onPressed: () {
-                          messageTextController.clear();
-                         _firestore.collection('messages').add({
-                            'sender': signInUser.uid,
-                            'text': messageText,
-                            'receiver' : data,
-                            'time' : FieldValue.serverTimestamp() ,
-                          });
-                        },
-                        child: Text(
-                          'send',
-                          style: TextStyle(
-                            color: Colors.orange[700]!,
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ))
-                  ],
-                ),
+            // message box
+            Padding(
+              padding: const EdgeInsets.only(bottom:30),
+              child: Row(
+                // crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    
+                    width: 0.6*(MediaQuery.of(context).size.width),
+                    height: 50,
+                      decoration: BoxDecoration(
+                        
+                      color: Color(0xffD9D9D9),
+                      borderRadius: BorderRadius.all(Radius.circular(15))
+                        
+                     ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            onPressed: (){},
+                            icon: Icon( 
+                              Icons.attach_file_outlined,
+                              color: Color(0xff604CD4),
+                              size: 25,
+                              )),
+
+                          Expanded(
+                              child: TextField(
+                                controller: messageTextController,
+                            onChanged: (value) {
+                              messageText = value;
+                            },
+                            decoration: InputDecoration(
+                                contentPadding:
+                                    EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                                hintText: 'Message...',
+                                hintStyle: TextStyle(color: Color(0xff717171)),
+                                border: InputBorder.none),
+                          )),     
+                        ]
+                      ),
+                    ),
+                   SizedBox(width: 15,),
+                   Container(
+                    height: 50,
+                    width: 50,
+                    padding: EdgeInsets.all(1), // Thickness of the border
+                    decoration: BoxDecoration(
+                      
+                          borderRadius: BorderRadius.circular(15),
+                              // shape: BoxShape.circle,
+                          color: Color(0xff604CD4),),
+                     child: IconButton(
+                            onPressed: () {
+                              messageTextController.clear();
+                             _firestore.collection('messages').add({
+                                'sender': signInUser.uid,
+                                'text': messageText,
+                                'receiver' : data,
+                                'time' : FieldValue.serverTimestamp() ,
+                              });
+                            },
+                            icon: Icon(
+                              Icons.send_rounded,
+                              color: Colors.white,),
+                            ),
+                   )
+                ],
               ),
+            ),
+
             ],
           ),
         ),
@@ -215,7 +296,7 @@ class MessageLine extends StatelessWidget {
           SizedBox(height: 5,) ,
           Material(
             elevation: 5 ,
-            color: isMe? Colors.red[400] : Color.fromARGB(255, 226, 128, 7),
+            color: isMe? Color(0xff8074ec) : Color(0xff604cd4),
             borderRadius:isMe? BorderRadius.only(
               topLeft: Radius.circular(15),
               topRight: Radius.circular(15),

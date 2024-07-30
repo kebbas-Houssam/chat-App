@@ -5,6 +5,7 @@ import 'package:chatapp/screens/login_screen.dart';
 import 'package:chatapp/screens/profile_screen.dart';
 import 'package:chatapp/screens/signup_screen.dart';
 import 'package:chatapp/widgets/Navigationbar.dart';
+import 'package:chatapp/widgets/navigationDrawer.dart';
 import 'package:flutter/material.dart';
 import 'screens/welcome_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -47,7 +48,7 @@ class MyApp extends StatelessWidget {
         EditUser.ScreenRoute :(context) => EditUser(),
         ChatsScreen.ScreenRoute : (context) => ChatsScreen(),
         ProfileScreen.ScreenRoute: (context) => ProfileScreen(),
-
+        'drawer' : (context) => Navigationdrawer(), 
         
       }
     );

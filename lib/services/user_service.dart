@@ -4,11 +4,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
-Future<Map<String, dynamic>> getUserData() async {
+Future<Map<String, dynamic>> getUserData(String userID) async {
+   final String Id = userID; 
   try {
     DocumentSnapshot<Map<String, dynamic>> userDoc = await _firestore
         .collection('users')
-        .doc(_auth.currentUser?.uid)
+        .doc(Id)
         .get();
 
     if (userDoc.exists) {

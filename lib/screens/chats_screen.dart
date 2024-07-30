@@ -2,15 +2,17 @@ import 'package:chatapp/screens/profile_screen.dart';
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
 import '../widgets/customTabBar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ChatsScreen extends StatefulWidget {
-  const ChatsScreen({super.key});
+   ChatsScreen({super.key});
   static const String ScreenRoute = 'chats_screen';
-
+  
   @override
   State<ChatsScreen> createState() => _ChatsScreenState();
 }
-Future<Map<String, dynamic>> userData = getUserData();
+final _auth = FirebaseAuth.instance;
+ 
 
 
   
@@ -19,6 +21,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       appBar: PreferredSize(
         preferredSize: Size.fromHeight(100),
         
@@ -29,7 +32,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
             // backgroundColor: Colors.amber,
             title: FutureBuilder<Map<String, dynamic>>(
           
-            future: getUserData(),
+            future: getUserData(_auth.currentUser!.uid),
             builder: (context, snapshot) {
           
               if (snapshot.connectionState == ConnectionState.waiting) {
@@ -47,21 +50,29 @@ class _ChatsScreenState extends State<ChatsScreen> {
                     mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       Container(
+                        
                         padding: EdgeInsets.all(3), // Thickness of the border
                         decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: Color(0xff604CD4),), // Border color
-                        child: CircleAvatar(
-                          radius: 20,
-                          backgroundColor: Colors.grey[300],
-                          backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
-                          child: imageUrl == null
-                              ? Icon(
-                                  Icons.account_circle,
-                                  size: 20,
-                                  // color: Colors.grey,
-                                )
-                              : null,
+                        color: Color(0xff604CD4),), 
+                        
+                        // Border color
+                        child: GestureDetector(
+                          onTap: (){
+                            Navigator.pushNamed(context, ProfileScreen.ScreenRoute);
+                          },
+                          child: CircleAvatar(
+                            radius: 20,
+                            backgroundColor: Colors.grey[300],
+                            backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
+                            child: imageUrl == null
+                                ? Icon(
+                                    Icons.account_circle,
+                                    size: 20,
+                                    // color: Colors.grey,
+                                  )
+                                : null,
+                          ),
                         ),
                       ),
                       SizedBox(width: 20,),
