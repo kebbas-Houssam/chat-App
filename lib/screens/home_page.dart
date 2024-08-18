@@ -3,17 +3,26 @@ import 'package:chatapp/screens/chat_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/widgets.dart';
 import 'chats_screen.dart';
 import 'profile_screen.dart';
 
 final _firestore = FirebaseFirestore.instance;
 final _auth = FirebaseAuth.instance;
+final _database = FirebaseDatabase.instance;
 final currentUser = _auth.currentUser;
+
 
 
 
 class HomePage extends StatefulWidget {
   static const String screenRoute = 'Home_page';
+
+
+
+  
+ 
 
   const HomePage({super.key});
 
@@ -22,18 +31,16 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  String? userName;
-  
-    //bottom Navigation bar pages 
+
+    
 
 
   @override
   void initState() {
     super.initState();
+   
     
   }
-
-  
 
   @override
   Widget build(BuildContext context) {
@@ -73,12 +80,12 @@ class UsersWidget extends StatelessWidget {
           if (_auth.currentUser?.uid != user.id){
               final userName = user.get('name');
               final imageUrl = user.get('profilePicture');
-              final userWidget = UserLine(user: userName , uid : user .id , image : imageUrl );
+              final online = user.get('isOnline');
+              final userWidget = UserLine(user: userName , uid : user.id , image : imageUrl , online : online);
               usersNames.add(userWidget);
           }
           
         }
-
         return Expanded(
           child: ListView(
             
@@ -92,10 +99,12 @@ class UsersWidget extends StatelessWidget {
 }
 
 class UserLine extends StatelessWidget {
-  const UserLine({super.key, required this.user , required this.image, required this.uid });
+  const UserLine({super.key, required this.user , required this.image,required this.online, required this.uid });
   final String user;
   final String uid;
   final String image;
+  final bool online;
+  
   @override
   Widget build(BuildContext context) {
     //add user image
@@ -109,36 +118,52 @@ class UserLine extends StatelessWidget {
               padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
               child: MaterialButton(
                 onPressed: () {
+                   List members = [uid] ;
+                  //  members.add(uid);
                   Navigator.pushNamed(context, ChatScreen.ScreenRoute,
-                  arguments: this.uid != null
-                  ? this.uid
+                  arguments: members != null && members.isNotEmpty
+                  ? members
                   : 'default'   );
                   
                 },
                 
                 child: Row(
                   children: [
-                    Container(
-                      padding: EdgeInsets.all(2), // Thickness of the border
-                        decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Color(0xff604CD4),),
-                      child: CircleAvatar(
-                          foregroundColor: Colors.amber,
+                    Stack(
+                      children:[ Container(
+                        padding: EdgeInsets.all(2), // Thickness of the border
+                          decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: online ? Colors.green : Colors.grey[500],),
+                          child: CircleAvatar(
+                            foregroundColor: Colors.amber,
+                            
+                            radius: 20,
+                            backgroundColor: Colors.grey[300],
+                            backgroundImage: image != null && image.isNotEmpty
+                             ? NetworkImage(image)
+                             : null,  
+                            child: image == null || image.isEmpty
+                                ? Icon(
+                                    Icons.account_circle,
+                                    size: 20,
+                                    color: Colors.grey,
+                                  )
+                                : null,
+                          ),
                           
-                          radius: 20,
-                          backgroundColor: Colors.grey[300],
-                          backgroundImage: image != null ? NetworkImage(image) : null,
-                          child: image == null
-                              ? Icon(
-                                  Icons.account_circle,
-                                  size: 20,
-                                  color: Colors.grey,
-                                )
-                              : null,
-                        ),
+                      ),
+                      Positioned(
+                        bottom: 0,
+                        right: 0,
+                        child: CircleAvatar( 
+                      radius: 6,
+                      backgroundColor: online ? Colors.green : Colors.grey[500],),
+                      )
+                      
+                      ]
                     ),
-                      SizedBox(width: 20,),
+                    SizedBox(width: 15,),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [

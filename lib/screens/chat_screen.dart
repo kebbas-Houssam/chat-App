@@ -53,30 +53,47 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  // void getMessagesStreams() async {
-  //   await for (var snapshot in _firestore.collection('messages').snapshots()) {
-  //     for (var msg in snapshot.docs) {
-  //       print(msg.data());
-  //     }
-  //   }
-  // }
-  late String data ;
+  Future<String?> getProfileImage(String userId) async {
+  try {
+    DocumentSnapshot documentSnapshot = await _firestore.collection('users').doc(userId).get();
+
+    if (documentSnapshot.exists && documentSnapshot.data() != null) {
+      return documentSnapshot.get('profilePicture') as String?;
+    } else {
+      return null; // في حالة عدم وجود صورة
+    }
+  } catch (e) {
+    print('Error fetching profile image: $e');
+    return null; // في حالة حدوث خطأ
+  }
+}
+  
   
   @override
   Widget build(BuildContext context) {
     
-    final args = ModalRoute.of(context)?.settings.arguments ;
-    if (args is String) {
-      data = args; // uid for the auther user  
-    } else {
-      data = 'Default Value'; 
-    }
+    final List<dynamic> args = ModalRoute.of(context)!.settings.arguments as List <dynamic>;
 
-    return Provider<String>(
-      create : (context)=> data ,
+    List <dynamic> data = [];
+
+    if (args is List) {
+      data = args;  
+    } else {
+      data = []; 
+    }
+    List <String> members = [];
+                  if (data.length==1 ) members.add(data[0]);
+                  else for (int i = 1; i < data.length; i++ ){
+                    members.add(data[i]['id']);}
+
+    //  final Future<String?> ImageUser = getProfileImage(_auth.currentUser!.uid);
+  
+  
+    return Provider<List<dynamic>>(
+      create : (context)=> data,
       
       child: Scaffold(
-        backgroundColor: Colors.white ,
+        // backgroundColor: Colors.white ,
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(100),
           child: Padding(
@@ -84,9 +101,11 @@ class _ChatScreenState extends State<ChatScreen> {
             child: AppBar(
               
               // backgroundColor: Colors.redAccent[400]!,
-              title: FutureBuilder<Map<String, dynamic>>(
-              
-                future: getUserData(data),
+              title: FutureBuilder(
+                
+                future: data.length == 1
+                ? _firestore.collection('users').doc(data[0]).get()
+                : _firestore.collection('groups').doc(data[0]).get(), 
                 builder: (context, snapshot) {
               
                   if (snapshot.connectionState == ConnectionState.waiting) {
@@ -96,8 +115,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   } else if (!snapshot.hasData) {
                     return Center(child: Text('User data not found'));
                   } else {
-                    Map<String, dynamic> userData = snapshot.data!;
-                    String? imageUrl = userData['profilePicture'];
+                   
+                    dynamic datas = snapshot.data!;
+                    // String? imageUrl = userData['profilePicture'];
               
                     return 
                        Row(
@@ -108,28 +128,60 @@ class _ChatScreenState extends State<ChatScreen> {
                             padding: EdgeInsets.all(3), // Thickness of the border
                             decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Color(0xff604CD4),), // Border color
+                            // color: Color(0xff604CD4)
+                            ), // Border color
                             child: CircleAvatar(
-                              radius: 20,
-                              backgroundColor: Colors.grey[300],
-                              backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
-                              child: imageUrl == null
-                                  ? Icon(
-                                      Icons.account_circle,
-                                      size: 20,
-                                      // color: Colors.grey,
+                               radius: data.length == 1 ? 20 : 15,
+                               backgroundColor: Colors.grey[300],
+                               backgroundImage: data.length == 1 && datas['profilePicture'] != null 
+                               ? NetworkImage(datas['profilePicture'])
+                               : NetworkImage(datas['members'][0]['profilePicture']),
+                               
+                               child: data.length == 1 && datas['profilePicture'] == null
+                               ? Icon(
+                                     Icons.account_circle,
+                                     size: 20,
+                               )              
+                               : data.length >= 2 
+                               ?  Stack(
+                                   clipBehavior: Clip.none,
+                                   children: [
+                                     Positioned(
+                                        left: 20,
+                                        bottom: 5,
+                                        child: Container(
+                                          padding: EdgeInsets.all(3), // Thickness of the border
+                                          decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          // color: Colors.white
+                                          ),
+
+                                          child: CircleAvatar(
+                                            radius: 15,
+                                            backgroundColor: Colors.grey,
+                                            backgroundImage: NetworkImage(datas['members'][1]['profilePicture']),
+                                          ),
+                                        )
+                                    ),
+                                ]
                                     )
-                                  : null,
-                            ),
+                                : null
+                                
+                          
+                            )
+
                           ),
-                          SizedBox(width: 20,),
+                          data.length ==1
+                          ? SizedBox(width: 20,)
+                          :SizedBox(width: 40,),
                        
                           Column(
                             
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(
-                                '${userData['name'] ?? 'User'}',
+                              Text( data.length == 1 
+                                ?'${datas['name'] ?? 'User'}'
+                                :'${datas['title']  }',
                                 style: TextStyle(
                                   fontSize: 20,
                                   color: Colors.black,
@@ -140,8 +192,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         ],
                          );
                     
-                  }
-                },
+                    
+                  
+                      }
+             },
               ),
             ),
           ),
@@ -151,7 +205,7 @@ class _ChatScreenState extends State<ChatScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-            Text(data),
+             Text(data[0]),
             MessageStreamBuilder(),
             // message box
             Padding(
@@ -210,11 +264,14 @@ class _ChatScreenState extends State<ChatScreen> {
                      child: IconButton(
                             onPressed: () {
                               messageTextController.clear();
+                                List receivers; 
+                                bool isGroupMessage = data.length == 1 ? false : true;
                              _firestore.collection('messages').add({
                                 'sender': signInUser.uid,
                                 'text': messageText,
-                                'receiver' : data,
+                                'receiver' : members ,//user id 
                                 'time' : FieldValue.serverTimestamp() ,
+                                'isGroupMessage' : isGroupMessage ,
                               });
                             },
                             icon: Icon(
@@ -239,7 +296,7 @@ class MessageStreamBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = Provider.of<String>(context);
+    final data = Provider.of<List>(context);
     return   StreamBuilder<QuerySnapshot>(
               stream: _firestore.collection('messages').orderBy('time').snapshots(), 
               builder: (context , snapshot){
@@ -253,15 +310,32 @@ class MessageStreamBuilder extends StatelessWidget {
                      );
                 }
                 final messages = snapshot.data!.docs.reversed;
-
-                for ( var msg in messages){
+                 
+                  for ( var msg in messages){
                   final sender = signInUser.uid;
-                  final receiver = data ;
-
-                  if ((sender == msg.get('sender') && receiver == msg.get('receiver')) || ((sender == msg.get('receiver') && receiver == msg.get('sender')))){
+                  List members = [];
+                  if (data.length==1 ) members = data ;
+                  else for (int i = 1; i < data.length; i++ ){
+                    members.add(data[i]['id']);
+                  }
+                  
+                  final List receivers = msg.get('receiver');
+                  for (var member in members){
+                    if (receivers != null && receivers.isNotEmpty)
+                    for(var receiver in receivers ){
+                      // if (sender != receiver )
+                    if ((sender == msg.get('sender') && member == receiver) || ((sender == receiver && member == msg.get('sender')))){
                     final text = msg.get('text');
-                    final messageWidget = MessageLine(text: text,isMe: sender == msg.get('sender') ,);
+
+                    final bool showMessage = (msg.get('isGroupMessage')== true && data.length>=2) 
+                                            || (msg.get('isGroupMessage') == false  && data.length==1) ;
+                    final messageWidget = MessageLine(text: text,isMe: sender == msg.get('sender') , showMessage: showMessage,);
                     messagesWidgets.add(messageWidget);
+                    
+                    }
+                    // break;
+                  }
+                  
                   }
                   // final sender = msg.get('sender');
                   // final receiver = msg.get('receiver');
@@ -281,10 +355,12 @@ class MessageStreamBuilder extends StatelessWidget {
 
 
 class MessageLine extends StatelessWidget {
-  const MessageLine({required this.text  ,required this.isMe , super.key});
+  const MessageLine({required this.text  ,required this.isMe , super.key , required this.showMessage });
   
   final String text;
   final bool isMe;
+  final bool showMessage;
+  
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -294,7 +370,8 @@ class MessageLine extends StatelessWidget {
         children: [
           // Text(sender , style: TextStyle(color: Colors.grey[600] , fontSize: 12),),
           SizedBox(height: 5,) ,
-          Material(
+          showMessage
+          ? Material(
             elevation: 5 ,
             color: isMe? Color(0xff8074ec) : Color(0xff604cd4),
             borderRadius:isMe? BorderRadius.only(
@@ -310,7 +387,8 @@ class MessageLine extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal:20 , vertical: 15),
               child: Text('$text' , style: TextStyle(color: Colors.white),),
             )
-            ),
+            )
+            :SizedBox.shrink(),
         ],
       ),
     );

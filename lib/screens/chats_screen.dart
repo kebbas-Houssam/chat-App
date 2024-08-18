@@ -1,4 +1,5 @@
 import 'package:chatapp/screens/profile_screen.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import '../services/user_service.dart';
 import '../widgets/customTabBar.dart';
@@ -12,11 +13,29 @@ class ChatsScreen extends StatefulWidget {
   State<ChatsScreen> createState() => _ChatsScreenState();
 }
 final _auth = FirebaseAuth.instance;
+final _database = FirebaseDatabase.instance;
+
+void _updateUserStatus(String userId, bool isOnline) {
+    DatabaseReference userRef = _database.ref().child('users').child(userId);
+
+    userRef.onDisconnect().update({'isOnline': false});
+    userRef.update({'isOnline': isOnline});
+  }
  
 
 
   
 class _ChatsScreenState extends State<ChatsScreen> {
+  
+    @override
+  void initState() {
+    super.initState();
+    _auth.authStateChanges().listen((User? user) {
+      if (user != null) {
+        _updateUserStatus(user.uid, true);
+      }
+    });
+  }
   
   @override
   Widget build(BuildContext context) {
@@ -64,8 +83,10 @@ class _ChatsScreenState extends State<ChatsScreen> {
                           child: CircleAvatar(
                             radius: 20,
                             backgroundColor: Colors.grey[300],
-                            backgroundImage: imageUrl != null ? NetworkImage(imageUrl) : null,
-                            child: imageUrl == null
+                            backgroundImage: imageUrl != null && imageUrl.isNotEmpty
+                             ? NetworkImage(imageUrl) 
+                             : null,
+                            child: imageUrl == null || imageUrl.isEmpty
                                 ? Icon(
                                     Icons.account_circle,
                                     size: 20,
