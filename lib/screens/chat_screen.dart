@@ -314,6 +314,8 @@ class MessageStreamBuilder extends StatelessWidget {
                   for ( var msg in messages){
                   final sender = signInUser.uid;
                   List members = [];
+                  late bool noRebuildMessage = true ;
+
                   if (data.length==1 ) members = data ;
                   else for (int i = 1; i < data.length; i++ ){
                     members.add(data[i]['id']);
@@ -323,8 +325,10 @@ class MessageStreamBuilder extends StatelessWidget {
                   for (var member in members){
                     if (receivers != null && receivers.isNotEmpty)
                     for(var receiver in receivers ){
-                      // if (sender != receiver )
-                    if ((sender == msg.get('sender') && member == receiver) || ((sender == receiver && member == msg.get('sender')))){
+
+                      if (sender != member ) 
+                    if ((sender == msg.get('sender') && member == receiver && noRebuildMessage) || ((sender == receiver && member == msg.get('sender')))){
+                    noRebuildMessage = false;
                     final text = msg.get('text');
 
                     final bool showMessage = (msg.get('isGroupMessage')== true && data.length>=2) 
