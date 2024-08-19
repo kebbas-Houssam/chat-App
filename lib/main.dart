@@ -1,5 +1,6 @@
 import 'package:chatapp/screens/chat_screen.dart';
 import 'package:chatapp/screens/chats_screen.dart';
+import 'package:chatapp/screens/groupDetails.dart';
 import 'package:chatapp/screens/home_page.dart';
 import 'package:chatapp/screens/login_screen.dart';
 import 'package:chatapp/screens/profile_screen.dart';
@@ -51,7 +52,9 @@ class MyApp extends StatelessWidget {
         EditUser.ScreenRoute :(context) => EditUser(),
         ChatsScreen.ScreenRoute : (context) => ChatsScreen(),
         ProfileScreen.ScreenRoute: (context) => ProfileScreen(),
-        'drawer' : (context) => Navigationdrawer(), 
+        Groupdetails.ScreenRoute: (context) => Groupdetails(),
+
+        
         
       }
     );

@@ -1,3 +1,4 @@
+import 'package:chatapp/screens/groupDetails.dart';
 import 'package:chatapp/screens/home_page.dart';
 import 'package:chatapp/screens/welcome_screen.dart';
 import 'package:chatapp/services/user_service.dart';
@@ -16,7 +17,6 @@ class ChatScreen extends StatefulWidget {
 
   static const String ScreenRoute = 'chat_screen';
 
-  // const ChatScreen({super.key, required String data});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -53,20 +53,6 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Future<String?> getProfileImage(String userId) async {
-  try {
-    DocumentSnapshot documentSnapshot = await _firestore.collection('users').doc(userId).get();
-
-    if (documentSnapshot.exists && documentSnapshot.data() != null) {
-      return documentSnapshot.get('profilePicture') as String?;
-    } else {
-      return null; // في حالة عدم وجود صورة
-    }
-  } catch (e) {
-    print('Error fetching profile image: $e');
-    return null; // في حالة حدوث خطأ
-  }
-}
   
   
   @override
@@ -85,8 +71,6 @@ class _ChatScreenState extends State<ChatScreen> {
                   if (data.length==1 ) members.add(data[0]);
                   else for (int i = 1; i < data.length; i++ ){
                     members.add(data[i]['id']);}
-
-    //  final Future<String?> ImageUser = getProfileImage(_auth.currentUser!.uid);
   
   
     return Provider<List<dynamic>>(
@@ -99,7 +83,26 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Padding(
             padding: const EdgeInsets.only(top : 20),
             child: AppBar(
-              
+              actions: [
+                data.length >=2 ?Padding(
+                  padding: const EdgeInsets.only(right : 20),
+                  child: GestureDetector(
+                    onTap: (){
+                        Navigator.pushNamed(context, Groupdetails.ScreenRoute ,
+                        arguments: data[0] != null 
+                        ? data[0]
+                        : null 
+                  );
+                    },
+                    child: Icon(
+                      Icons.info_sharp,
+                      size : 25 ,
+                      color: Color(0xff8074ec),
+                      ),
+                  ),
+                )
+                :SizedBox.shrink(),
+              ],
               // backgroundColor: Colors.redAccent[400]!,
               title: FutureBuilder(
                 

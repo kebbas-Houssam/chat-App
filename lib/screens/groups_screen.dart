@@ -100,7 +100,7 @@ class GroupLine extends StatelessWidget {
                   arguments: group!= null && group.isNotEmpty
                   ? group
                   : 'default'   );
-                  print(group);
+                
             },
             child: Container(
               decoration: BoxDecoration(
