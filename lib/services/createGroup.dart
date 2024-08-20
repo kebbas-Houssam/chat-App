@@ -67,7 +67,8 @@ class _CreateGroupState extends State<CreateGroup> {
                     var profilePicture = user.get('profilePicture');
                     
                      
-                      if (userId == _auth.currentUser!.uid && noDoublicateUser  ) {
+                      if (userId == _auth.currentUser!.uid   ) {
+                            if (noDoublicateUser)
                             _selectedUsers.add({
                                 'id': _auth.currentUser!.uid,
                                 'name': username ,

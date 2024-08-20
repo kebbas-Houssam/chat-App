@@ -138,7 +138,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                backgroundColor: Colors.grey[300],
                                backgroundImage: data.length == 1 && datas['profilePicture'] != null 
                                ? NetworkImage(datas['profilePicture'])
-                               : NetworkImage(datas['members'][0]['profilePicture']),
+                               : NetworkImage(datas['members'][1]['profilePicture']),
                                
                                child: data.length == 1 && datas['profilePicture'] == null
                                ? Icon(
@@ -162,7 +162,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                           child: CircleAvatar(
                                             radius: 15,
                                             backgroundColor: Colors.grey,
-                                            backgroundImage: NetworkImage(datas['members'][1]['profilePicture']),
+                                            backgroundImage: NetworkImage(datas['members'][2]['profilePicture']),
                                           ),
                                         )
                                     ),
@@ -275,6 +275,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 'receiver' : members ,//user id 
                                 'time' : FieldValue.serverTimestamp() ,
                                 'isGroupMessage' : isGroupMessage ,
+                                'groupeId' : data[0],
                               });
                             },
                             icon: Icon(
@@ -330,7 +331,7 @@ class MessageStreamBuilder extends StatelessWidget {
                     for(var receiver in receivers ){
 
                       if (sender != member ) 
-                    if ((sender == msg.get('sender') && member == receiver && noRebuildMessage) || ((sender == receiver && member == msg.get('sender')))){
+                    if (((sender == msg.get('sender') && member == receiver && noRebuildMessage) || ((sender == receiver && member == msg.get('sender')))) && data[0] == msg.get('groupeId')){
                     noRebuildMessage = false;
                     final text = msg.get('text');
 
