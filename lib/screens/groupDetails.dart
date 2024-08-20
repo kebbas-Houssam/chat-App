@@ -1,4 +1,6 @@
+import 'package:chatapp/screens/add_user_in_group.dart';
 import 'package:chatapp/screens/chats_screen.dart';
+import 'package:chatapp/widgets/Navigationbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -84,7 +86,11 @@ class _GroupdetailsState extends State<Groupdetails> {
                           children: [
                             IconButton(
                               onPressed:(){
-
+                                 Navigator.pushNamed(context, AddUserGroup.ScreenRoute,
+                                 arguments: groupInformation!= null 
+                                 ?groupInformation
+                                 : null
+                                 );
                               },
                               icon: Icon(Icons.person_add),
                               ),
@@ -101,7 +107,7 @@ class _GroupdetailsState extends State<Groupdetails> {
                                       'members' : groupMembers  
                                       }
                                     );
-                                    Navigator.pushNamed(context, ChatsScreen.ScreenRoute);
+                                    Navigator.pushNamed(context, Navigationbar.ScreenRoute);
                                   }
                                 }
                               },
@@ -130,7 +136,7 @@ class _GroupdetailsState extends State<Groupdetails> {
                                         CircleAvatar(
                                           radius: 20,
                                           backgroundColor: Colors.grey,
-                                          backgroundImage: NetworkImage(groupMembers[index]!['profilePicture']),
+                                          backgroundImage: NetworkImage(groupMembers[index]['profilePicture']),
                                         ),
                                         SizedBox(width: 20,),
                                         Text(groupMembers[index]['name'])

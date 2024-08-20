@@ -11,6 +11,7 @@ class CreateGroup extends StatefulWidget {
 class _CreateGroupState extends State<CreateGroup> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+  late bool noDoublicateUser = true;
   List<Map<String, dynamic>> _selectedUsers = [];
   late String title ='';
 
@@ -56,7 +57,7 @@ class _CreateGroupState extends State<CreateGroup> {
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return Text('No users found');
                 }
-
+                
                 return ListView.builder(
                   itemCount: snapshot.data!.docs.length,
                   itemBuilder: (context, index) {
@@ -64,10 +65,18 @@ class _CreateGroupState extends State<CreateGroup> {
                     var username = user.get('name');
                     var userId = user.id;
                     var profilePicture = user.get('profilePicture');
-
-                    if (userId == _auth.currentUser!.uid) {
-                      return SizedBox.shrink();
-                    }
+                    
+                     
+                      if (userId == _auth.currentUser!.uid && noDoublicateUser  ) {
+                            _selectedUsers.add({
+                                'id': _auth.currentUser!.uid,
+                                'name': username ,
+                                'profilePicture': profilePicture,
+                           });   
+                           noDoublicateUser = false;
+                           return SizedBox.shrink();                     
+                      } 
+                                        
 
                     Map<String, dynamic> userData = {
                       'id': userId,
@@ -112,14 +121,6 @@ class _CreateGroupState extends State<CreateGroup> {
   void _createGroup() async {
     if (_selectedUsers.isNotEmpty) {
       DocumentReference groupRef = _firestore.collection('groups').doc();
-
-      // إضافة بيانات المستخدم الحالي
-      _selectedUsers.add({
-        'id': _auth.currentUser!.uid,
-        'name': _auth.currentUser!.displayName ?? 'Unnamed',
-        'profilePicture': _auth.currentUser!.photoURL,
-      });
-
       await groupRef.set({
         'title': title,
         'members': _selectedUsers,

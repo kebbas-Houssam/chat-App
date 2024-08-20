@@ -1,3 +1,4 @@
+import 'package:chatapp/screens/add_user_in_group.dart';
 import 'package:chatapp/screens/chat_screen.dart';
 import 'package:chatapp/screens/chats_screen.dart';
 import 'package:chatapp/screens/groupDetails.dart';
@@ -53,6 +54,7 @@ class MyApp extends StatelessWidget {
         ChatsScreen.ScreenRoute : (context) => ChatsScreen(),
         ProfileScreen.ScreenRoute: (context) => ProfileScreen(),
         Groupdetails.ScreenRoute: (context) => Groupdetails(),
+        AddUserGroup.ScreenRoute :(context) => AddUserGroup(),
 
         
         
