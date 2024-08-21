@@ -1,5 +1,6 @@
 import 'package:chatapp/screens/edit_user_information.dart';
 import 'package:chatapp/screens/welcome_screen.dart';
+import 'package:chatapp/services/image_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -28,44 +29,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _userFuture = _firestore.collection('users').doc(_auth.currentUser?.uid).get();
     
   }
-  
-
-  //choise image from gallery 
-Future<XFile?> pickImage() async {
-  final ImagePicker picker = ImagePicker();
-  return await picker.pickImage(source: ImageSource.gallery);
-}
- //upload image to firebase storage
-Future<String> uploadImage(XFile image) async {
-  File file = File(image.path);
-  try {
-    String fileName = 'user_images/${DateTime.now().millisecondsSinceEpoch}.png';
-    Reference ref = FirebaseStorage.instance.ref().child(fileName);
-    await ref.putFile(file);
-    return await ref.getDownloadURL();
-  } catch (e) {
-    print('Failed to upload image: $e');
-    return '';
-  }
-}
-//update user Image (database)
-Future<void> updateUserProfile(String imageUrl) async {
-  String userId = _auth.currentUser!.uid;
-  await _firestore.collection('users').doc(userId).update({
-    'profilePicture': imageUrl,
-  });
-}
-
-void pickAndUploadImage() async {
-  XFile? image = await pickImage();
-  if (image != null) {
-    String imageUrl = await uploadImage(image);
-    if (imageUrl.isNotEmpty) {
-      await updateUserProfile(imageUrl);
-      print('Profile picture updated successfully');
-    }
-  }
-}
 
  Future<Map<String, dynamic>> getUserData() async {
     try {
