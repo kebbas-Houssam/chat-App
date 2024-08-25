@@ -430,21 +430,19 @@ class MessageStreamBuilder extends StatelessWidget {
                     if (receivers != null && receivers.isNotEmpty)
                     for(var receiver in receivers ){
 
-                      if (sender != member ) 
-                    if (((sender == msg.get('sender') && member == receiver && noRebuildMessage) || ((sender == receiver && member == msg.get('sender')))) && data[0] == msg.get('groupeId')){
+                    if (((sender == msg.get('sender') && member == receiver && noRebuildMessage) || ((sender == receiver && member == msg.get('sender')))) && (data[0] == msg.get('groupeId') || data.length == 1)){
                     noRebuildMessage = false;
                     final text = msg.get('text');
                     final type = msg.get('type');
-                    print(type);
-                    final bool showMessage = (msg.get('isGroupMessage')== true && data.length>=2) 
-                                            || (msg.get('isGroupMessage') == false  && data.length==1) ;
-                    print(type + showMessage.toString());
-
+                    
+                    final bool showMessage = ( msg.get('isGroupMessage') && data.length>=2) 
+                                            || (!msg.get('isGroupMessage')   && data.length==1) ;
+                    
                     final messageWidget = MessageLine(text: text,isMe: sender == msg.get('sender') , showMessage: showMessage,type : type);
                     messagesWidgets.add(messageWidget);
                     
                     }
-                    // break;
+                   
                   }
                   
                   }
