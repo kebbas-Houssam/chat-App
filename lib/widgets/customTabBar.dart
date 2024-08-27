@@ -1,5 +1,6 @@
-import 'package:chatapp/screens/home_page.dart';
+import 'package:chatapp/screens/groups_screen.dart';
 import 'package:chatapp/screens/profile_screen.dart';
+import 'package:chatapp/screens/users_Screen.dart';
 import 'package:flutter/material.dart';
 
 class CustomTabBar extends StatefulWidget {
@@ -45,8 +46,8 @@ class _CustomTabBarState extends State<CustomTabBar> {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  _buildTabItem(0, 'All', _activeTabIndex == 0),
-                  _buildTabItem(1, 'Active', _activeTabIndex == 1),
+                  _buildTabItem(0, 'Friends', _activeTabIndex == 0),
+                  _buildTabItem(1, 'Groups', _activeTabIndex == 1),
                 ],
               ),
             ),
@@ -60,8 +61,8 @@ class _CustomTabBarState extends State<CustomTabBar> {
                   });
                 },
                 children: [
-                  HomePage(), // Your AllPage widget
-                  ProfileScreen() // Your ActivePage widget
+                  UsersScreen(), // Your AllPage widget
+                  GroupsScreen(), // Your ActivePage widget
                 ],
               ),
             ),

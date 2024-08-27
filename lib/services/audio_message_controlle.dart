@@ -17,8 +17,8 @@ class _AudioMessageBubbleState extends State<AudioMessageBubble> {
     super.initState();
     
     _audioPlayer = AudioPlayer();
-   
   }
+
    @override
   void dispose() {
     _audioPlayer.dispose();

@@ -48,6 +48,7 @@ dependencies:
   firebase_database: ^11.0.4
   record: ^5.1.2
   audioplayers: ^4.0.1
+  connectivity_plus: ^6.0.5
   # image_cropper: ^7.1.0
 
 dev_dependencies:

@@ -1,12 +1,11 @@
 import 'dart:io';
-
 import 'package:chatapp/screens/groupDetails.dart';
-import 'package:chatapp/screens/home_page.dart';
-import 'package:chatapp/screens/welcome_screen.dart';
-import 'package:chatapp/services/audio_message.dart';
+import 'package:chatapp/services/audio_message_controlle.dart';
 import 'package:chatapp/services/image_service.dart';
-import 'package:chatapp/services/user_service.dart';
-import 'package:chatapp/widgets/audioWaveform.dart';
+import 'package:chatapp/services/voice_message.dart';
+import 'package:chatapp/widgets/group_Widget.dart';
+import 'package:chatapp/widgets/user_Widget.dart';
+import 'package:chatapp/widgets/users_Widget.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,139 +14,45 @@ import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:record/record.dart';
 import 'package:audioplayers/audioplayers.dart';
 
 
 late AudioPlayer _audioPlayer;
 final _firestore = FirebaseFirestore.instance;
-late User signInUser;
-
+final _auth = FirebaseAuth.instance;
 
 class ChatScreen extends StatefulWidget {
 
   static const String ScreenRoute = 'chat_screen';
-
-
   @override
   State<ChatScreen> createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
   final messageTextController = TextEditingController();
-  final _auth = FirebaseAuth.instance;
+  
   XFile? pickedImage ;
   String? messageText;
-  
   
   @override
   void initState() {
     super.initState();
-    _audioRecorder = AudioRecorder();
-    
-    getUser();
+      
   }
-
-  void getUser() {
-    try {
-      final user = _auth.currentUser;
-
-      if (user != null) {
-        signInUser = user;
-      }
-    } catch (e) {
-      print(e);
-    }
+  @override
+  void dispose() {
+    super.dispose();
   }
-
-  void getMessages() async {
-    final messages = await _firestore.collection('messages').get();
-    for (var msg in messages.docs) {
-      print(msg.data());
-    }
-  }
-  //////Audio Services/////////////////////////////////////////
-  
-  bool _isRecording = false;
-  late AudioRecorder _audioRecorder;
-  String? _recordingFilePath;
-  
-  
-  Future<void> _startRecording() async {
-    try {
-      if (await _audioRecorder.hasPermission()) {
-        Directory tempDir = await getTemporaryDirectory();
-        await _audioRecorder.start(RecordConfig(), path: '${tempDir.path}/audio_message.m4a');
-         
-        setState(() {
-          _isRecording = true;
-        });
-      }
-    } catch (e) {
-      print('Error starting recording: $e');
-    }
-  }
-
-  Future<void> _stopRecording(String sender , List receiver ,bool isGroupMessage,String groupeId) async {
-    try {
-      String? path = await _audioRecorder.stop();
-      setState(() {
-        _isRecording = false;
-      });
-      if (path != null) {
-        await _uploadAudio(File(path) , sender,receiver , isGroupMessage , groupeId );
-      }
-    } catch (e) {
-      print('Error stopping recording: $e');
-    }
-  }
-
-    Future<void> _uploadAudio(File audioFile , String sender , List receiver ,bool isGroupMessage,String groupeId )async {
-    try {
-      String fileName = 'audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
-      Reference ref = FirebaseStorage.instance.ref().child('audio_messages/$fileName');
-      UploadTask uploadTask = ref.putFile(audioFile);
-      TaskSnapshot taskSnapshot = await uploadTask;
-      String downloadUrl = await taskSnapshot.ref.getDownloadURL();
-
-      await FirebaseFirestore.instance.collection('messages').add({
-        'type': 'audio',
-        'text': downloadUrl,
-        'time': FieldValue.serverTimestamp(),
-        'sender': sender,
-        'receiver' : receiver ,//user id 
-        'isGroupMessage' : isGroupMessage ,
-        'groupeId' : groupeId,     
-      });
-
-      print('Audio message sent successfully');
-    } catch (e) {
-      print('Error uploading audio: $e');
-    }
-  }
-
-  
-
-
-
 
   @override
     Widget build(BuildContext context) {
     
-    final List<dynamic> args = ModalRoute.of(context)!.settings.arguments as List <dynamic>;
-
-    List <dynamic> data = [];
-
-    if (args is List) {
-      data = args;  
-    } else {
-      data = []; 
-    }
+    final List<dynamic> data = ModalRoute.of(context)!.settings.arguments as List <dynamic>;
+    
     List <String> members = [];
-                  if (data.length==1 ) {
-                    members.add(data[0]);
-                  } else for (int i = 1; i < data.length; i++ ){
-                    members.add(data[i]['id']);}
+
+    if (data.length==1 ) { members.add(data[0]);} 
+     else for (int i = 1; i < data.length; i++ ){ members.add(data[i]['id']); }
   
     bool isGroupMessage = data.length == 1 ? false : true;
   
@@ -155,7 +60,6 @@ class _ChatScreenState extends State<ChatScreen> {
       create : (context)=> data,
       
       child: Scaffold(
-        // backgroundColor: Colors.white ,
         appBar: PreferredSize(
           preferredSize: Size.fromHeight(100),
           child: Padding(
@@ -181,103 +85,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 )
                 :SizedBox.shrink(),
               ],
-              // backgroundColor: Colors.redAccent[400]!,
-              title: FutureBuilder(
-                
-                future: data.length == 1
-                ? _firestore.collection('users').doc(data[0]).get()
-                : _firestore.collection('groups').doc(data[0]).get(), 
-                builder: (context, snapshot) {
               
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (!snapshot.hasData) {
-                    return Center(child: Text('User data not found'));
-                  } else {
-                   
-                    dynamic datas = snapshot.data!;
-                    // String? imageUrl = userData['profilePicture'];
-              
-                    return 
-                       Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          
-                          Container(
-                            padding: EdgeInsets.all(3), // Thickness of the border
-                            decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            // color: Color(0xff604CD4)
-                            ), // Border color
-                            child: CircleAvatar(
-                               radius: data.length == 1 ? 20 : 15,
-                               backgroundColor: Colors.grey[300],
-                               backgroundImage: data.length == 1 && datas['profilePicture'] != null 
-                               ? NetworkImage(datas['profilePicture'])
-                               : NetworkImage(datas['members'][1]['profilePicture']),
-                               
-                               child: data.length == 1 && datas['profilePicture'] == null
-                               ? Icon(
-                                     Icons.account_circle,
-                                     size: 20,
-                               )              
-                               : data.length >= 2 
-                               ?  Stack(
-                                   clipBehavior: Clip.none,
-                                   children: [
-                                     Positioned(
-                                        left: 20,
-                                        bottom: 5,
-                                        child: Container(
-                                          padding: EdgeInsets.all(3), // Thickness of the border
-                                          decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          // color: Colors.white
-                                          ),
-
-                                          child: CircleAvatar(
-                                            radius: 15,
-                                            backgroundColor: Colors.grey,
-                                            backgroundImage: NetworkImage(datas['members'][2]['profilePicture']),
-                                          ),
-                                        )
-                                    ),
-                                ]
-                                    )
-                                : null
-                                
-                          
-                            )
-
-                          ),
-                          data.length ==1
-                          ? SizedBox(width: 20,)
-                          :SizedBox(width: 40,),
-                       
-                          Column(
-                            
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text( data.length == 1 
-                                ?'${datas['name'] ?? 'User'}'
-                                :'${datas['title']  }',
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  color: Colors.black,
-                                   fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
-                        ],
-                         );
-                    
-                    
-                  
-                      }
-             },
-              ),
+              title: data.length == 1 ? UserWidget(user: data[0],)
+                                      :GroupWidget(group: data[0]),
             ),
           ),
         ),
@@ -308,20 +118,11 @@ class _ChatScreenState extends State<ChatScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          IconButton(
-                             icon: Icon(_isRecording ? Icons.stop : Icons.mic ,
-                                         color: Color(0xff604CD4),
-                                         size: 25,),
-                             onPressed: () {
-                                 if (_isRecording) {
-                                   _stopRecording(_auth.currentUser!.uid, members,isGroupMessage, data[0]);
-                                 } else {
-                                   _startRecording();
-                                 }
-                               },
-                              
-                            ),
-
+                          VoiceMessage(
+                            sender: _auth.currentUser!.uid,
+                            receiver: members, 
+                            isGroupMessage: isGroupMessage, 
+                            groupeId: data[0]),
                           IconButton(
                             onPressed: () async {
                                 pickedImage = await pickImage();  
@@ -364,7 +165,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                 List receivers; 
                                 
                              _firestore.collection('messages').add({
-                                'sender': signInUser.uid,
+                                'sender': _auth.currentUser!.uid,
                                 'text': pickedImage == null 
                                         ? messageText
                                         :await uploadImage(pickedImage! , 'messageImages'),
@@ -415,7 +216,7 @@ class MessageStreamBuilder extends StatelessWidget {
                 final messages = snapshot.data!.docs.reversed;
                  
                   for ( var msg in messages){
-                  final sender = signInUser.uid;
+                  final sender = _auth.currentUser!.uid;
                   List members = [];
                   late bool noRebuildMessage = true ;
 
@@ -429,7 +230,8 @@ class MessageStreamBuilder extends StatelessWidget {
                   for (var member in members){
                     if (receivers != null && receivers.isNotEmpty)
                     for(var receiver in receivers ){
-
+                    if (sender != member )
+                    
                     if (((sender == msg.get('sender') && member == receiver && noRebuildMessage) || ((sender == receiver && member == msg.get('sender')))) && (data[0] == msg.get('groupeId') || data.length == 1)){
                     noRebuildMessage = false;
                     final text = msg.get('text');

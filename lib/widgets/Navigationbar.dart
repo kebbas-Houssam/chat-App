@@ -1,7 +1,7 @@
 import 'package:chatapp/screens/chats_screen.dart';
 import 'package:chatapp/screens/groups_screen.dart';
-import 'package:chatapp/screens/home_page.dart';
-import 'package:chatapp/screens/profile_screen.dart';
+import 'package:chatapp/screens/users_Screen.dart';
+import 'package:chatapp/services/user_status_service.dart';
 import 'package:flutter/material.dart';
 
 class Navigationbar extends StatefulWidget {
@@ -13,10 +13,12 @@ class Navigationbar extends StatefulWidget {
 }
 
 class _NavigationbarState extends State<Navigationbar> {
+  final UserStatusService _userStatusService = UserStatusService();
+
   int index = 0 ;
     final List <Widget> _pages = [
     ChatsScreen(),
-    GroupsScreen()
+    UsersScreen(),
     
   ];
   @override

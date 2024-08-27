@@ -1,5 +1,3 @@
-import 'package:chatapp/screens/chat_screen.dart';
-import 'package:chatapp/screens/home_page.dart';
 import 'package:chatapp/widgets/MyButton.dart';
 import 'package:chatapp/widgets/Navigationbar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
