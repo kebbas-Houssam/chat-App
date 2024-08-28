@@ -30,23 +30,9 @@ Future<String> uploadImage(XFile image , String path) async {
   }
 }
  //message photo
-  Future<void> sendMessage(String imageUrl) async {
-    if (imageUrl.isNotEmpty) {
-      await _firestore.collection('messages').add({
-        'sender': _auth.currentUser!.uid,
-        'imageUrl': imageUrl,
-        'timestamp': FieldValue.serverTimestamp(),
-      });
-    }
-  }
+  
 
-  void handleSendImage() async {
-    XFile? pickedImage = await pickImage();
-    if (pickedImage != null) {
-      String imageUrl = await uploadImage(pickedImage , 'messageImages');
-      await sendMessage(imageUrl);
-    }
-  }
+ 
 //update user Image (database)
 Future<void> updateUserProfile(String imageUrl) async {
   String userId = _auth.currentUser!.uid;

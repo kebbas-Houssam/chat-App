@@ -4,8 +4,8 @@ import 'package:chatapp/services/audio_message_controlle.dart';
 import 'package:chatapp/services/image_service.dart';
 import 'package:chatapp/services/voice_message.dart';
 import 'package:chatapp/widgets/group_Widget.dart';
+import 'package:chatapp/widgets/message_Widget.dart';
 import 'package:chatapp/widgets/user_Widget.dart';
-import 'package:chatapp/widgets/users_Widget.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -47,16 +47,11 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
     Widget build(BuildContext context) {
     
-    final List<dynamic> data = ModalRoute.of(context)!.settings.arguments as List <dynamic>;
+    final Map <String , dynamic > data = ModalRoute.of(context)!.settings.arguments as Map <String , dynamic>;
     
-    List <String> members = [];
-
-    if (data.length==1 ) { members.add(data[0]);} 
-     else for (int i = 1; i < data.length; i++ ){ members.add(data[i]['id']); }
+    bool isGroupMessage = data['type'] == 'user' ? false : true;
   
-    bool isGroupMessage = data.length == 1 ? false : true;
-  
-    return Provider<List<dynamic>>(
+    return Provider<Map <String ,dynamic> >(
       create : (context)=> data,
       
       child: Scaffold(
@@ -66,13 +61,13 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.only(top : 20),
             child: AppBar(
               actions: [
-                data.length >=2 ?Padding(
+                data['type'] == 'group' ?Padding(
                   padding: const EdgeInsets.only(right : 20),
                   child: GestureDetector(
                     onTap: (){
                         Navigator.pushNamed(context, Groupdetails.ScreenRoute ,
-                        arguments: data[0] != null 
-                        ? data[0]
+                        arguments: data['id'] != null 
+                        ? data['id']
                         : null 
                   );
                     },
@@ -86,8 +81,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 :SizedBox.shrink(),
               ],
               
-              title: data.length == 1 ? UserWidget(user: data[0],)
-                                      :GroupWidget(group: data[0]),
+              title: data['type'] == 'group' ? GroupWidget(group: data['id'] as String)
+                                             : UserWidget(user: data['id'] as String,),
+                                            
             ),
           ),
         ),
@@ -96,9 +92,8 @@ class _ChatScreenState extends State<ChatScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-             Text(data[0]),
+             Text(data['id'] as String),
             MessageStreamBuilder(),
-            // message box
             Padding(
               padding: const EdgeInsets.only(bottom:30),
               child: Row(
@@ -120,9 +115,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         children: [
                           VoiceMessage(
                             sender: _auth.currentUser!.uid,
-                            receiver: members, 
+                            receiver: data['type'] == 'user' ? [data['id'] ] : data['members'], 
                             isGroupMessage: isGroupMessage, 
-                            groupeId: data[0]),
+                            groupeId: data['id'] as String),
+                            
                           IconButton(
                             onPressed: () async {
                                 pickedImage = await pickImage();  
@@ -136,15 +132,15 @@ class _ChatScreenState extends State<ChatScreen> {
                           Expanded(
                               child: TextField(
                                 controller: messageTextController,
-                            onChanged: (value) {
-                              messageText = value;
-                            },
-                            decoration: InputDecoration(
+                                onChanged: (value) {
+                                messageText = value;
+                              },
+                            decoration: const InputDecoration(
                                 contentPadding:
-                                    EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                                hintText: 'Message...',
-                                hintStyle: TextStyle(color: Color(0xff717171)),
-                                border: InputBorder.none),
+                                  EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                                  hintText: 'Message...',
+                                  hintStyle: TextStyle(color: Color(0xff717171)),
+                                  border: InputBorder.none),
                           )),     
                         ]
                       ),
@@ -159,10 +155,10 @@ class _ChatScreenState extends State<ChatScreen> {
                           borderRadius: BorderRadius.circular(15),
                               // shape: BoxShape.circle,
                           color: Color(0xff604CD4),),
-                     child: IconButton(
+                          child: IconButton(
                             onPressed: () async {
                               messageTextController.clear();
-                                List receivers; 
+                              List receivers; 
                                 
                              _firestore.collection('messages').add({
                                 'sender': _auth.currentUser!.uid,
@@ -171,11 +167,11 @@ class _ChatScreenState extends State<ChatScreen> {
                                         :await uploadImage(pickedImage! , 'messageImages'),
                                 'type' : pickedImage == null 
                                          ? 'messageText' 
-                                         :'messageImage',       
-                                'receiver' : members ,//user id 
+                                         : 'messageImage',       
+                                'receiver' : data['type'] == 'user' ? [data['id']] : data['members'],
                                 'time' : FieldValue.serverTimestamp() ,
                                 'isGroupMessage' : isGroupMessage ,
-                                'groupeId' : data[0] ,
+                                'groupeId' : data['id'] ,
                               });
                             },
                             icon: Icon(
@@ -200,56 +196,55 @@ class MessageStreamBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final data = Provider.of<List>(context);
+
+    final data = Provider.of<Map <String ,dynamic >>(context);
+
     return   StreamBuilder<QuerySnapshot>(
               stream: _firestore.collection('messages').orderBy('time').snapshots(), 
               builder: (context , snapshot){
                 List <MessageLine> messagesWidgets = [];
 
                 if (!snapshot.hasData){
-                     return Center(
-                        child:CircularProgressIndicator(
-                          backgroundColor: Colors.blue,
-                        ) ,
+                     return const Center(
+                        child:CircularProgressIndicator() ,
                      );
                 }
                 final messages = snapshot.data!.docs.reversed;
                  
                   for ( var msg in messages){
-                  final sender = _auth.currentUser!.uid;
-                  List members = [];
-                  late bool noRebuildMessage = true ;
 
-                  if (data.length==1 ) {
-                    members = data ;
-                  } else for (int i = 1; i < data.length; i++ ){
-                    members.add(data[i]['id']);
-                  }
+                  final sender = _auth.currentUser!.uid;
+                  late bool noRebuildMessage = true ;
+                  List members = [];
+
+                  if (data['type'] == 'user' ) {
+                    members = [data['id']]  ;
+                  } else 
+                     members = data['members'];
+                  
                   
                   final List receivers = msg.get('receiver');
+
                   for (var member in members){
                     if (receivers != null && receivers.isNotEmpty)
-                    for(var receiver in receivers ){
-                    if (sender != member )
                     
-                    if (((sender == msg.get('sender') && member == receiver && noRebuildMessage) || ((sender == receiver && member == msg.get('sender')))) && (data[0] == msg.get('groupeId') || data.length == 1)){
+                    for(var receiver in receivers ){
+                    // if (sender != member )
+                    
+                    if (((sender == msg.get('sender') && member == receiver && noRebuildMessage) || ((sender == receiver && member == msg.get('sender')))) && (data['id'] == msg.get('groupeId')  || data['type'] == 'user')){
                     noRebuildMessage = false;
                     final text = msg.get('text');
                     final type = msg.get('type');
                     
-                    final bool showMessage = ( msg.get('isGroupMessage') && data.length>=2) 
-                                            || (!msg.get('isGroupMessage')   && data.length==1) ;
-                    
+                    final bool showMessage = ( msg.get('isGroupMessage') && data['type'] == 'group') 
+                                            || (!msg.get('isGroupMessage') && data['type'] == 'user') ;
+                    print(showMessage);
                     final messageWidget = MessageLine(text: text,isMe: sender == msg.get('sender') , showMessage: showMessage,type : type);
                     messagesWidgets.add(messageWidget);
-                    
                     }
-                   
                   }
-                  
-                  }
-                  
-                  }
+                }
+              }
                  return Expanded(
                    child: ListView(
                     reverse: true,
@@ -263,57 +258,3 @@ class MessageStreamBuilder extends StatelessWidget {
 }
 
 
-class MessageLine extends StatelessWidget {
-  const MessageLine({required this.text  ,required this.isMe , super.key , required this.showMessage , required this.type});
-  final String type;
-  final String text;
-  final bool isMe;
-  final bool showMessage;
-  
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(8),
-      child: Column(
-        crossAxisAlignment:isMe? CrossAxisAlignment.end : CrossAxisAlignment.start,
-        children: [
-            // Text(sender , style: TextStyle(color: Colors.grey[600] , fontSize: 12),),
-            SizedBox(height: 5,) ,
-            showMessage
-             ?type == 'messageImage'
-              ?Image.network(
-                  text, 
-                  width: 100, 
-                  height: 200
-                )
-              : Material(
-                elevation: 5 ,
-                color: isMe? Color(0xff8074ec) : Color(0xff604cd4),
-                borderRadius:isMe? BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                  bottomLeft: Radius.circular(15),
-                ) : BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                  bottomRight: Radius.circular(15),
-                ),
-                child: Padding(
-                  padding: type == 'messageText' ?const EdgeInsets.symmetric(horizontal:15 , vertical: 10)
-                                                  : EdgeInsets.symmetric(horizontal:0 , vertical: 0) ,
-                  child: type == 'messageText'
-                  
-                  ?Text('$text' , style: TextStyle(color: Colors.white , fontSize: 18),)
-                  :type =='audio'
-                  ?AudioMessageBubble(audioUrl: text)
- 
-                  :SizedBox.shrink(),
-                )
-                )
-  
-            :SizedBox.shrink(),
-        ],
-      ),
-    );
-  }
-} 

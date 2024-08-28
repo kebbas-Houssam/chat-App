@@ -38,13 +38,35 @@ class _GroupsScreenState extends State<GroupsScreen> {
             return const Center(child: Text('No group found'));
           }
 
-          List<GroupWidget> groupsList = [];
+          List<Widget> groupsList = [];
 
           for (var group in snapshot.data!.docs) {
+
             List members = group.get('members');
-            for (var user in members){
+            List <String> membersId = [];
+            for (var user in members){          
+              membersId.add(user['id']);
+              print(membersId);
             if (user['id'] == _auth.currentUser?.uid) {
-              groupsList.add(GroupWidget(group: group.id));
+              groupsList.add(
+                GestureDetector(
+                  onTap: (){
+                    Map <String , dynamic > data  = 
+                    {
+                      'type' : 'group' ,
+                      'id' : group.id ,
+                      'members' : membersId ,
+                    };
+                    print(data);
+                    
+                    Navigator.pushNamed(context, ChatScreen.ScreenRoute,
+                       arguments: data != null && data.isNotEmpty
+                       ? data
+                       : 'default'   );},
+
+                  child: GroupWidget(group: group.id)
+                  )
+                );
             }
             }
           }

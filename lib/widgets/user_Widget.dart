@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class UserWidget extends StatelessWidget {
   UserWidget({super.key , required this.user });
   final String user ;
+  
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
 
@@ -54,17 +55,7 @@ class UserLine extends StatelessWidget {
         Material(
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            child: MaterialButton(
-              onPressed: () {
-                 List members = [uid] ;
-                //  members.add(uid);
-                Navigator.pushNamed(context, ChatScreen.ScreenRoute,
-                arguments: members != null && members.isNotEmpty
-                ? members
-                : 'default'   );
-                
-              },
-              
+            child: Material(
               child: Row(
                 children: [
                   Stack(

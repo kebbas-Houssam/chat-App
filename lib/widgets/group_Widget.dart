@@ -51,17 +51,7 @@ class GroupLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return 
-    GestureDetector(
-      onTap: (){
-        List group = [];
-        group.add(id);
-        group.addAll(members);
-        Navigator.pushNamed(context, ChatScreen.ScreenRoute,
-           arguments: group!= null && group.isNotEmpty
-           ? group
-           : 'default'   );},
-
-      child: Padding(
+      Padding(
         padding: EdgeInsets.only(top : 30 , left: 20),
         child: Row(
           
@@ -97,7 +87,7 @@ class GroupLine extends StatelessWidget {
                   )
             ],
         ),
-      ),
-    );
+      );
+    
   }
 }
