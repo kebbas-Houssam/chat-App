@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 
 class UsersScreen extends StatefulWidget {
    UsersScreen({super.key});
-  static const String screenRoute = 'Home_page';
+  static const String screenRoute = 'UsersScreen';
 
 
   @override
@@ -49,12 +49,15 @@ class _UsersScreenState extends State<UsersScreen> {
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return const Text('No users found');
         }
-
+        
         List<Widget> usersNames = [];
+        
         for (var user in snapshot.data!.docs) {
-          if (_auth.currentUser?.uid != user.id){
-
-              usersNames.add(
+          if (_auth.currentUser?.uid != user.id ){
+            //  for (var friend in user['friends']){
+            //   if (user.id != friend) {
+                List friendRequest = user['fiendReduest'];
+                usersNames.add(
                 GestureDetector(
                   onTap: () {
                      Map <String , dynamic> data = 
@@ -66,14 +69,35 @@ class _UsersScreenState extends State<UsersScreen> {
                      arguments: data != null && data.isNotEmpty
                      ? data
                      : 'default'   );
-                     
-                
               },
-                  child: UserWidget(user: user.id)
+                  child: Row(
+                    children: [
+                      UserWidget(user: user.id),
+                      SizedBox(width: 70,),
+                      IconButton(
+                        onPressed: (){
+                             setState(() {
+                                friendRequest.add(_auth.currentUser!.uid);
+                             });
+                             _firestore.collection('users').doc(user.id).update(
+                              {
+                                'fiendReduest' : friendRequest
+                              }
+                             );
+                        },
+                        icon: Icon(
+                          Icons.person_add,
+                          color: Color(0xFF604CD4),
+                          size: 30, ))
+                    ],
+                  )
                   ));
-          }
-          
-        }
+              }
+             }
+              
+              
+        //   }
+        // }
         return Expanded(
           child: ListView(
             

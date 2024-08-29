@@ -3,6 +3,7 @@ import 'package:chatapp/screens/chat_screen.dart';
 import 'package:chatapp/screens/chats_screen.dart';
 import 'package:chatapp/screens/groupDetails.dart';
 import 'package:chatapp/screens/login_screen.dart';
+import 'package:chatapp/screens/notifications_screen.dart';
 import 'package:chatapp/screens/profile_screen.dart';
 import 'package:chatapp/screens/signup_screen.dart';
 import 'package:chatapp/screens/users_Screen.dart';
@@ -54,7 +55,7 @@ class MyApp extends StatelessWidget {
         ProfileScreen.ScreenRoute: (context) => ProfileScreen(),
         Groupdetails.ScreenRoute: (context) => Groupdetails(),
         AddUserGroup.ScreenRoute :(context) => AddUserGroup(),
-        // AudioMessageSender.ScreenRoute :(context) => AudioMessageSender(),
+        NotificationScreen.screenRoute :(context) => NotificationScreen(),
         
         
       }
