@@ -1,3 +1,4 @@
+import 'package:chatapp/screens/friends_screen.dart';
 import 'package:chatapp/screens/groups_screen.dart';
 import 'package:chatapp/screens/profile_screen.dart';
 import 'package:chatapp/screens/users_Screen.dart';
@@ -61,7 +62,7 @@ class _CustomTabBarState extends State<CustomTabBar> {
                   });
                 },
                 children: [
-                  UsersScreen(), // Your AllPage widget
+                  FriendsScreen(), // Your AllPage widget
                   GroupsScreen(), // Your ActivePage widget
                 ],
               ),

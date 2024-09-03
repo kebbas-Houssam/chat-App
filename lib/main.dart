@@ -33,7 +33,10 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Message Me',
       theme: ThemeData(
-
+        scaffoldBackgroundColor: Color(0xFFF5F5F5),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Color(0xFFF5F5F5)
+        ),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),

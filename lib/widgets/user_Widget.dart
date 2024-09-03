@@ -4,8 +4,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserWidget extends StatelessWidget {
-  UserWidget({super.key , required this.user });
+  UserWidget({super.key , required this.user ,required this.userImageRaduis ,required this.text });
   final String user ;
+  final double userImageRaduis;
+  final String text;
   
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
@@ -31,7 +33,7 @@ class UserWidget extends StatelessWidget {
          final userName = user?['name'] ;
          final imageUrl = user?['profilePicture'] ;
 
-        return UserLine(user: userName , uid : this.user , image : imageUrl );
+        return UserLine(user: userName , uid : this.user , image : imageUrl , userImageRaduis : this.userImageRaduis , text : this.text);
         
       },
     );
@@ -39,10 +41,12 @@ class UserWidget extends StatelessWidget {
 }
 
 class UserLine extends StatelessWidget {
-  const UserLine({super.key, required this.user , required this.image, required this.uid });
+  const UserLine({super.key, required this.user , required this.image, required this.uid , required this.userImageRaduis , required this.text});
   final String user;
   final String uid;
   final String image;
+  final double userImageRaduis;
+  final String text;
   
   
   @override
@@ -52,57 +56,45 @@ class UserLine extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
       
-        Material(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-            child: Material(
-              child: Row(
-                children: [
-                  Stack(
-                    children:[ 
-                      CircleAvatar(
-                      foregroundColor: Colors.amber,
-                      
-                      radius: 20,
-                      backgroundColor: Colors.grey[300],
-                      backgroundImage: image != null && image.isNotEmpty
-                       ? NetworkImage(image)
-                       : null,  
-                      child: image == null || image.isEmpty
-                          ? Icon(
-                              Icons.account_circle,
-                              size: 20,
-                              color: Colors.grey,
-                            )
-                          : null,
-                    ),                      
-                    ]
-                  ),
-                  SizedBox(width: 15,),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        '$user',
-                        style: const TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold),
-                      ),
-                      Text('Hi Hellooooo',
-                            style: TextStyle(
-                            color: Colors.grey[400],
-                            fontSize: 12,
-                            fontWeight: FontWeight.normal),
-                            
-                            )
-                    ],
-                  ),
-                ],
-              ),
+        Row(
+          children: [
+            Stack(
+              children:[ 
+                CircleAvatar(
+                foregroundColor: Colors.amber,
+                radius: userImageRaduis,
+                backgroundColor: Colors.grey,
+                backgroundImage: image != null && image.isNotEmpty
+                 ? NetworkImage(image)
+                 : null,  
+                child: image == null || image.isEmpty
+                    ? Icon(
+                        Icons.account_circle,
+                        size: 20,
+                        color: Colors.grey,
+                      )
+                    : null,
+              ),                      
+              ]
             ),
-            
-          ),
+            SizedBox(width: 15,),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$user',
+                  style: const TextStyle(
+                    color: Colors.black,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 0,),
+                Text( text,style: TextStyle( color: Colors.black.withOpacity(0.6), fontWeight: FontWeight.w300 ,fontSize: 15),
+                )
+                
+              ],
+            ),
+          ],
         ),
         
       ],

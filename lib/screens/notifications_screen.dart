@@ -43,7 +43,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
               friendRequests.add(
                 Row(
                   children: [
-                    UserWidget(user: request),
+                    UserWidget(user: request ,userImageRaduis: 25,text: '',),
                     SizedBox(width: 50),
                     IconButton(
                       onPressed: () {

@@ -1,8 +1,11 @@
+import 'package:chatapp/screens/friends_screen.dart';
 import 'package:chatapp/screens/notifications_screen.dart';
 import 'package:chatapp/screens/profile_screen.dart';
 import 'package:chatapp/widgets/user_Widget.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import '../services/user_service.dart';
 import '../widgets/customTabBar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,27 +19,13 @@ class ChatsScreen extends StatefulWidget {
 }
 final _auth = FirebaseAuth.instance;
 final _database = FirebaseDatabase.instance;
-
-void _updateUserStatus(String userId, bool isOnline) {
-    DatabaseReference userRef = _database.ref().child('users').child(userId);
-
-    userRef.onDisconnect().update({'isOnline': false});
-    userRef.update({'isOnline': isOnline});
-  }
  
-
-
-  
 class _ChatsScreenState extends State<ChatsScreen> {
   
     @override
   void initState() {
     super.initState();
-    _auth.authStateChanges().listen((User? user) {
-      if (user != null) {
-        _updateUserStatus(user.uid, true);
-      }
-    });
+    
   }
   
   @override
@@ -47,7 +36,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
         preferredSize: Size.fromHeight(100),
         
         child: Padding(
-          padding: const EdgeInsets.only(top : 20, left: 10),
+          padding: const EdgeInsets.only(top : 20, left: 20),
           child: AppBar(
             automaticallyImplyLeading: false,
             // backgroundColor: Colors.amber,
@@ -55,15 +44,10 @@ class _ChatsScreenState extends State<ChatsScreen> {
                     onTap: (){
                       Navigator.pushNamed(context, ProfileScreen.ScreenRoute);
                         },
-                    child: UserWidget(user : _auth.currentUser!.uid)),
+                    child: UserWidget(user : _auth.currentUser!.uid , userImageRaduis: 25, text: "Hello,",)),
           actions: [
-            Icon(
-                Icons.search ,
-                color: Color(0xFF604CD4),
-                size: 30,
-              ),
-              SizedBox(width: 20,),
-            Padding(
+           
+           Padding(
               padding: const EdgeInsets.only(right: 20),
               child: IconButton(
                 onPressed: (){
@@ -71,19 +55,28 @@ class _ChatsScreenState extends State<ChatsScreen> {
                 },
                 icon : const Icon(
                   Icons.notifications_outlined,
-                  color: Color(0xFF604CD4),
+                  color: Color(0xFF3D98FF),
                   size: 30,   
                   ) ,
-                
               ),
             ),
-            
             
           ],    
           ),
         ),
       ),
-      body: CustomTabBar(),
+      body: Padding(
+        padding:EdgeInsets.symmetric(horizontal: 30),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Chats',style:TextStyle(fontSize: 35 , fontWeight: FontWeight.bold)),
+            Expanded(child: FriendsScreen())
+            
+          ],
+        ),
+        )
+      
       
     );
   }
