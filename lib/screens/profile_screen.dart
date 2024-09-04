@@ -1,6 +1,7 @@
 import 'package:chatapp/screens/edit_user_information.dart';
 import 'package:chatapp/screens/welcome_screen.dart';
 import 'package:chatapp/services/image_service.dart';
+import 'package:chatapp/services/user_status_service.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -16,6 +17,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+  UserStatusService _userStatusService = UserStatusService();
   Future<DocumentSnapshot>? _userFuture;
   
   @override
@@ -44,7 +46,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       throw Exception('Failed to load user data: $e');
     }
   }
-
+ 
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +60,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                switch(results){
                 case 'logout' : 
                   _auth.signOut();
+                  _userStatusService.updateUserStatus(_auth.currentUser!.uid, "offline");
                   Navigator.pushNamed(context, WelcomeScreen.ScreenRoute); 
                   break; 
                 case 'edit Profile' :

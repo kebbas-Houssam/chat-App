@@ -16,6 +16,7 @@ class FriendsScreen extends StatefulWidget {
 class _FriendsScreenState extends State<FriendsScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -1,4 +1,5 @@
 import 'package:chatapp/screens/chat_screen.dart';
+import 'package:chatapp/widgets/user_status_circul.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -58,25 +59,7 @@ class UserLine extends StatelessWidget {
       
         Row(
           children: [
-            Stack(
-              children:[ 
-                CircleAvatar(
-                foregroundColor: Colors.amber,
-                radius: userImageRaduis,
-                backgroundColor: Colors.grey,
-                backgroundImage: image != null && image.isNotEmpty
-                 ? NetworkImage(image)
-                 : null,  
-                child: image == null || image.isEmpty
-                    ? Icon(
-                        Icons.account_circle,
-                        size: 20,
-                        color: Colors.grey,
-                      )
-                    : null,
-              ),                      
-              ]
-            ),
+            UserStatusCircul(userId: uid , userPictureRaduis: 22,),
             SizedBox(width: 15,),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
