@@ -72,7 +72,7 @@ class UserLine extends StatelessWidget {
                     fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 0,),
-                Text( text,style: TextStyle( color: Colors.black.withOpacity(0.6), fontWeight: FontWeight.w300 ,fontSize: 15),
+                Text( text ,style: TextStyle( color: Colors.black.withOpacity(0.6), fontWeight: FontWeight.w300 ,fontSize: 15),
                 )
                 
               ],

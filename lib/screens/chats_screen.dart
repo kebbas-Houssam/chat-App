@@ -84,7 +84,7 @@ class _ChatsScreenState extends State<ChatsScreen> {
           
           SizedBox(
             height:90 ,
-            child: UserActiveWidget()),
+            child: UserActiveWidget()), //i need show it only if users online
             Expanded(
             child: Padding(
               padding: const EdgeInsets.only(left :30),

@@ -1,4 +1,5 @@
 import 'package:chatapp/screens/chat_screen.dart';
+import 'package:chatapp/services/get_last_seen.dart';
 import 'package:chatapp/widgets/user_status_circul.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,31 +16,33 @@ class UserActiveWidget extends StatefulWidget {
 class _UserActiveWidgetState extends State<UserActiveWidget> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
-
+  GetLastSeen _getLastSeen = GetLastSeen();
+  
   Future<List<Widget>> _getActiveUsers(List userFriends) async {
     List<Widget> activeUsers = [];
 
     for (var friend in userFriends) {
       DocumentSnapshot snapshot = await _firestore.collection('users').doc(friend).get();
       if (snapshot.exists) {
-        Map<String, dynamic>? data =
-            snapshot.data() as Map<String, dynamic>?;
+        Map<String, dynamic>? data = snapshot.data() as Map<String, dynamic>?;
         if (data != null && data['status'] == "online") {
           activeUsers.add(
             Padding(
               padding: const EdgeInsets.only(left: 20, top: 25),
               child: GestureDetector(
-                onTap: () {
-                  Map<String, dynamic> data = {
-                    'type': 'user',
-                    'id': friend,
-                  };
-                  Navigator.pushNamed(
-                    context,
-                    ChatScreen.ScreenRoute,
-                    arguments: data.isNotEmpty ? data : 'default',
-                  );
-                },
+                     onTap: () async {
+                     String lastSeenString = await _getLastSeen.getLastseen(friend);
+                     Map <String , dynamic> data = 
+                     { 
+                      'type' : 'user',
+                      'id': friend,
+                      'lastSeen' : lastSeenString,
+                        } ;
+                     Navigator.pushNamed(context, ChatScreen.ScreenRoute,
+                     arguments: data != null && data.isNotEmpty
+                     ? data
+                     : 'default'   );
+              },
                 child: UserStatusCircul(
                   userId: friend,
                   userPictureRaduis: 28,

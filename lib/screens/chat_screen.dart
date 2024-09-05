@@ -82,7 +82,7 @@ class _ChatScreenState extends State<ChatScreen> {
               ],
               
               title: data['type'] == 'group' ? GroupWidget(group: data['id'] as String)
-                                             : UserWidget(user: data['id'] as String, userImageRaduis: 25,text: '',),
+                                             : UserWidget(user: data['id'] as String, userImageRaduis: 25,text: data['lastSeen'] ),
                                             
             ),
           ),

@@ -1,10 +1,12 @@
 import 'package:chatapp/screens/chat_screen.dart';
+import 'package:chatapp/services/get_last_seen.dart';
 import 'package:chatapp/widgets/user_Widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 
 class FriendsScreen extends StatefulWidget {
   const FriendsScreen({super.key});
@@ -16,7 +18,8 @@ class FriendsScreen extends StatefulWidget {
 class _FriendsScreenState extends State<FriendsScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
-  
+  GetLastSeen _getLastSeen = GetLastSeen();
+   
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,14 +39,18 @@ class _FriendsScreenState extends State<FriendsScreen> {
         }
         //  List friends = snapshot!.data?['friends'];
          List <Widget> friendsList  = [];
+         
          for (var friend in snapshot!.data?['friends']){
+          
           friendsList.add(
             GestureDetector(
-               onTap: () {
+               onTap: () async {
+                     String lastSeenString = await _getLastSeen.getLastseen(friend);
                      Map <String , dynamic> data = 
                      { 
                       'type' : 'user',
                       'id': friend,
+                      'lastSeen' : lastSeenString,
                         } ;
                      Navigator.pushNamed(context, ChatScreen.ScreenRoute,
                      arguments: data != null && data.isNotEmpty

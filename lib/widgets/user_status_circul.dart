@@ -1,4 +1,3 @@
-import 'package:chatapp/services/user_informations.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
