@@ -41,7 +41,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
         String messageType = data['type'];
         switch (messageType) {
           case 'messageText':
-            return messageSender == _auth.currentUser!.uid ? "You: ${_timeService.truncateText(data['text'], 15)}   .$time" : "${_timeService.truncateText(data['text'], 20)}   .$time" ;
+            return messageSender == _auth.currentUser!.uid ? "You: ${_timeService.truncateText(data['text'], 25)}   .$time" : "${_timeService.truncateText(data['text'], 20)}   .$time" ;
           case 'messageImage':
             return messageSender == _auth.currentUser!.uid ? "You: send image   .$time"  : 'send image   .$time' ;
           case 'audio':
