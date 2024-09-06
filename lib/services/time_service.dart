@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+  import 'package:intl/intl.dart';
 
-class GetLastSeen {
+
+class TimeService {
   
   final _firestore = FirebaseFirestore.instance;
 
@@ -14,7 +16,7 @@ class GetLastSeen {
            else {
            
              Timestamp lastSeen = data!['lastSeen'];
-              lastSeenString = _formatLastSeen(lastSeen.millisecondsSinceEpoch);
+              lastSeenString = formatLastSeen(lastSeen.millisecondsSinceEpoch);
            
            }
         }    
@@ -23,7 +25,7 @@ class GetLastSeen {
      
       }
 
-    String _formatLastSeen(int? timestamp) {
+    String formatLastSeen(int? timestamp) {
       if (timestamp == null) return 'Unknown';
       
       final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
@@ -49,5 +51,40 @@ class GetLastSeen {
         return 'Just now';
     }
   }
+
+
+String formatMessageTime(int? timestamp) {
+  if (timestamp == null) return 'Unknown';
+
+  final dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp);
+  final now = DateTime.now();
+
+  final yearDifference = now.year - dateTime.year;
+  final weekDifference = now.difference(dateTime).inDays ~/ 7;
+  final dayDifference = now.difference(dateTime).inDays;
+  final hourDifference = now.difference(dateTime).inHours;
+  final minuteDifference = now.difference(dateTime).inMinutes;
+
+  if (yearDifference > 0) {
+    return DateFormat('d MMM yyyy').format(dateTime); //  22 Jun 2022
+  } else if (dayDifference >= 30) {
+    return DateFormat('d MMM').format(dateTime); //  12Aug
+  } else if (weekDifference > 0) {
+    
+    return DateFormat('EEE').format(dateTime); //Wed, Tue
+  } else  return DateFormat('HH:mm').format(dateTime); //  21:34
+  
+}
+
+String truncateText(String text, int length) {
+  if (text.length > length) {
+     String truncated =  text.substring(0, length) + '...';
+     return '\u202A' + truncated + '\u202C';
+  } else {
+    return text;
+  }
+}
+
+
   
 }

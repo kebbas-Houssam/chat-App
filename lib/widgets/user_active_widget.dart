@@ -1,5 +1,5 @@
 import 'package:chatapp/screens/chat_screen.dart';
-import 'package:chatapp/services/get_last_seen.dart';
+import 'package:chatapp/services/time_service.dart';
 import 'package:chatapp/widgets/user_status_circul.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -16,7 +16,7 @@ class UserActiveWidget extends StatefulWidget {
 class _UserActiveWidgetState extends State<UserActiveWidget> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
-  GetLastSeen _getLastSeen = GetLastSeen();
+  TimeService _timeService = TimeService();
   
   Future<List<Widget>> _getActiveUsers(List userFriends) async {
     List<Widget> activeUsers = [];
@@ -31,7 +31,7 @@ class _UserActiveWidgetState extends State<UserActiveWidget> {
               padding: const EdgeInsets.only(left: 20, top: 25),
               child: GestureDetector(
                      onTap: () async {
-                     String lastSeenString = await _getLastSeen.getLastseen(friend);
+                     String lastSeenString = await _timeService.getLastseen(friend);
                      Map <String , dynamic> data = 
                      { 
                       'type' : 'user',

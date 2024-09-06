@@ -24,32 +24,40 @@ class MessageLine extends StatelessWidget {
                   width: 100, 
                   height: 200
                 )
-              : Material(
-                elevation: 5 ,
-                color: isMe? const Color(0xff8074ec) : Color(0xff604cd4),
-                borderRadius:isMe? const BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                  bottomLeft: Radius.circular(15),
-                ) : const BorderRadius.only(
-                  topLeft: Radius.circular(15),
-                  topRight: Radius.circular(15),
-                  bottomRight: Radius.circular(15),
-                ),
-                child: Padding(
-                  padding: type == 'messageText' ? const EdgeInsets.symmetric(horizontal:15 , vertical: 10)
-                                                  : const EdgeInsets.symmetric(horizontal:0 , vertical: 0) ,
-                  child: type == 'messageText'
-                  
-                  ?Text(text , style: const TextStyle(color: Colors.white , fontSize: 18),)
-                  :type =='audio'
-                  ?AudioMessageBubble(audioUrl: text)
- 
-                  :const SizedBox.shrink(),
-                )
-                )
-  
-            :const SizedBox.shrink(),
+              : Container(
+                 constraints: BoxConstraints(
+                   maxWidth: MediaQuery.of(context).size.width * 0.5, // زيادة العرض الأقصى
+                 ),
+                 child: Material(
+                   elevation: 5,
+                   color: isMe ? const Color(0xff8074ec) : const Color(0xff604cd4),
+                   borderRadius: isMe
+                       ? const BorderRadius.only(
+                           topLeft: Radius.circular(15),
+                           topRight: Radius.circular(15),
+                           bottomLeft: Radius.circular(15),
+                         )
+                       : const BorderRadius.only(
+                           topLeft: Radius.circular(15),
+                           topRight: Radius.circular(15),
+                           bottomRight: Radius.circular(15),
+                         ),
+                   child: Padding(
+                     padding: type == 'messageText'
+                         ? const EdgeInsets.symmetric(horizontal: 15, vertical: 10)
+                         : const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                     child: type == 'messageText'
+                         ? Text(
+                             text,
+                     style: const TextStyle(color: Colors.white, fontSize: 18),
+                   )
+                 : type == 'audio'
+                     ? AudioMessageBubble(audioUrl: text)
+                     : const SizedBox.shrink(),
+              ),
+           ),
+        )
+         :const SizedBox.shrink(),
         ],
       ),
     );
