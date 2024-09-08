@@ -49,7 +49,6 @@ class _ChatsScreenState extends State<ChatsScreen> {
           padding: const EdgeInsets.only(top : 20, left: 20),
           child: AppBar(
             automaticallyImplyLeading: false,
-            // backgroundColor: Colors.amber,
             title: GestureDetector(
                     onTap: (){
                       Navigator.pushNamed(context, ProfileScreen.ScreenRoute);
@@ -64,8 +63,8 @@ class _ChatsScreenState extends State<ChatsScreen> {
                    Navigator.pushNamed(context, NotificationScreen.screenRoute);
                 },
                 icon : const Icon(
-                  Icons.notifications_outlined,
-                  color: Color(0xFF3D98FF),
+                  Icons.notifications_rounded,
+                  color: Colors.black,
                   size: 30,   
                   ) ,
               ),

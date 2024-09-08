@@ -1,7 +1,7 @@
-import 'package:chatapp/screens/chats_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:shimmer/shimmer.dart';
 
 class UserStatusCircul extends StatefulWidget {
   const UserStatusCircul({super.key , required this.userId , required this.userPictureRaduis});
@@ -37,8 +37,10 @@ class _UserStatusCirculState extends State<UserStatusCircul> {
            children: [
             CircleAvatar(
               radius : raduis,
-              backgroundColor: Colors.grey,
-             backgroundImage: NetworkImage(data!['profilePicture'])),
+              backgroundColor: Colors.grey.shade400,
+              backgroundImage: NetworkImage(data!['profilePicture']),
+              // child: (data!['profilePicture']== null && data!['profilePicture']== '') ? Icon(Icons.person,size: 22,color: Colors.grey,) : null
+              ),
             Positioned(
               left: 0.5*(raduis)+raduis,
               top: 0.5*(raduis)+raduis,

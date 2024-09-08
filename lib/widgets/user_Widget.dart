@@ -1,5 +1,3 @@
-import 'package:chatapp/screens/chat_screen.dart';
-import 'package:chatapp/screens/chats_screen.dart';
 import 'package:chatapp/widgets/shimmer.dart';
 import 'package:chatapp/widgets/user_status_circul.dart';
 import 'package:flutter/material.dart';

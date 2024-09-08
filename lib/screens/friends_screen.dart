@@ -1,4 +1,5 @@
 import 'package:chatapp/screens/chat_screen.dart';
+import 'package:chatapp/services/get_message.dart';
 import 'package:chatapp/services/time_service.dart';
 import 'package:chatapp/widgets/user_Widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,41 +20,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   TimeService _timeService = TimeService();
+  GetMessage _getMessage = GetMessage(); 
 
-    Stream<String> getLastMessage(String sender, String receiver) {
-  return _firestore
-      .collection('messages')
-      .orderBy('time', descending: true)
-      .snapshots()
-      .map((snapshot) {
-    if (snapshot.docs.isEmpty) {
-      return 'say hi!';
-    }
+  List <dynamic> lastUSerMessage = [];
 
-    for (var msg in snapshot.docs) {
-      Map<String, dynamic> data = msg.data() as Map<String, dynamic>;
-      String messageSender = data['sender'];
-      List<dynamic> messageReceivers = data['receiver'];
-      Timestamp messageTime = data['time'];
-         String time = _timeService.formatMessageTime(messageTime.millisecondsSinceEpoch);
-      if ((messageSender == sender && messageReceivers.contains(receiver)) ||
-          (messageSender == receiver && messageReceivers.contains(sender))) {
-        String messageType = data['type'];
-        switch (messageType) {
-          case 'messageText':
-            return messageSender == _auth.currentUser!.uid ? "You: ${_timeService.truncateText(data['text'], 20)}  .$time" : "${_timeService.truncateText(data['text'], 20)}  .$time" ;
-          case 'messageImage':
-            return messageSender == _auth.currentUser!.uid ? "You: image   .$time"  : ' image  .$time' ;
-          case 'audio':
-               return messageSender == _auth.currentUser!.uid ? "You: message vocale   .$time"  : ' message vocale  .$time' ;
-          default:
-            return 'message';
-        }
-      }
-    }
-    return 'say hi!';
-  });
-}
+  
    
   @override
   Widget build(BuildContext context) {
@@ -77,8 +48,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
          
 
          for (var friend in snapshot!.data?['friends']){
-          
-          friendsList.add   (
+            friendsList.add (
             GestureDetector(
                onTap: () async {
                      String lastSeenString = await _timeService.getLastseen(friend);
@@ -95,21 +65,29 @@ class _FriendsScreenState extends State<FriendsScreen> {
               },
                child: Padding(
                  padding: const EdgeInsets.only(top : 20),
-                 child: StreamBuilder<String>(
-                  stream: getLastMessage(_auth.currentUser?.uid ?? 'user' , friend),
-                  builder: (context , messageSnapshot){
+                 child: StreamBuilder<dynamic>(
+                 stream: _getMessage.getLastMessage(_auth.currentUser?.uid ?? 'user', friend,friend),
+                 builder: (context, messageSnapshot) {
+                   if (messageSnapshot.hasError) {
+                     return const Text('No message');
+                   }
+               
+                   if (!messageSnapshot.hasData || messageSnapshot.data == null) {
+                     return const Text('No message');
+                   }
+               
+                   Map<String, dynamic>? lastMessage = messageSnapshot.data as Map<String, dynamic>?;
+               
+                   return Expanded(
+                     child: UserWidget(
+                       user: friend,
+                       userImageRaduis: 22,
+                       text: lastMessage != null && lastMessage['text'] != null ? lastMessage['text'] : 'No message',
+                     ),
+                   );
+                 },
+              ),
 
-                    if (messageSnapshot.hasError){
-                      return const Text('no message');
-                    }
-                    return Expanded(
-                      child: UserWidget(
-                        user: friend , 
-                        userImageRaduis: 22,
-                        text: messageSnapshot.data ?? 'no message'),
-                    );
-                  }
-                   ),//
                )));
          }
         return

@@ -81,7 +81,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 :SizedBox.shrink(),
               ],
               
-              title: data['type'] == 'group' ? GroupWidget(group: data['id'] as String)
+              title: data['type'] == 'group' ? GroupWidget(group: data['id'] as String , text : '')
                                              : UserWidget(user: data['id'] as String, userImageRaduis: 25,text: data['lastSeen'] ),
                                             
             ),

@@ -66,14 +66,14 @@ class _NavigationbarState extends State<Navigationbar> {
         children: [
           Icon(
             isSelected ? activeIcon : icon,
-            color: isSelected ? Color(0xFF3D98FF) : Color(0xFF9CA3AF),
+            color: isSelected ? Colors.black : Color(0xFF9CA3AF),
             size: 24,
           ),
           SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
-              color: isSelected ? Color(0xFF3D98FF) : Color(0xFF9CA3AF),
+              color: isSelected ? Colors.black : Color(0xFF9CA3AF),
               fontSize: 10,
               fontWeight: FontWeight.w500,
             ),
