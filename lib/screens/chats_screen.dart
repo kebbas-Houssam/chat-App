@@ -2,6 +2,7 @@ import 'package:chatapp/screens/friends_screen.dart';
 import 'package:chatapp/screens/notifications_screen.dart';
 import 'package:chatapp/screens/profile_screen.dart';
 import 'package:chatapp/services/user_status_service.dart';
+import 'package:chatapp/widgets/shimmer.dart';
 import 'package:chatapp/widgets/user_Widget.dart';
 import 'package:chatapp/widgets/user_active_widget.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -77,17 +78,17 @@ class _ChatsScreenState extends State<ChatsScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 30),
+          const Padding(
+            padding: EdgeInsets.only(left: 30),
             child: Text('Chats',style:TextStyle(fontSize: 35 , fontWeight: FontWeight.bold)),
           ),
           
           SizedBox(
             height:90 ,
             child: UserActiveWidget()), //i need show it only if users online
-            Expanded(
+            const Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(left :30),
+              padding: EdgeInsets.only(left :30),
               child: FriendsScreen(),
             ))
           
@@ -98,3 +99,4 @@ class _ChatsScreenState extends State<ChatsScreen> {
     );
   }
 }
+

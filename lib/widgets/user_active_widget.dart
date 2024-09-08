@@ -1,5 +1,7 @@
 import 'package:chatapp/screens/chat_screen.dart';
+import 'package:chatapp/screens/chats_screen.dart';
 import 'package:chatapp/services/time_service.dart';
+import 'package:chatapp/widgets/shimmer.dart';
 import 'package:chatapp/widgets/user_status_circul.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -62,7 +64,7 @@ class _UserActiveWidgetState extends State<UserActiveWidget> {
       stream: _firestore.collection('users').doc(_auth.currentUser!.uid).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return Sckelton2(raduis: 60);
         }
 
         if (snapshot.hasError) {
@@ -79,7 +81,19 @@ class _UserActiveWidgetState extends State<UserActiveWidget> {
           future: _getActiveUsers(userFriends),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const CircularProgressIndicator();
+              return const Row(
+                children: [
+                  SizedBox(width: 15,),
+                  Sckelton2(raduis: 60),
+                  SizedBox(width: 15,),
+                  Sckelton2(raduis: 60),
+                  SizedBox(width: 15,),
+                  Sckelton2(raduis: 60),
+                  SizedBox(width: 15,),
+                  Sckelton2(raduis: 60),
+                  
+                ],
+              );
             }
 
             if (snapshot.hasError) {

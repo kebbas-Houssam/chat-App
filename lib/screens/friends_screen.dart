@@ -41,11 +41,11 @@ class _FriendsScreenState extends State<FriendsScreen> {
         String messageType = data['type'];
         switch (messageType) {
           case 'messageText':
-            return messageSender == _auth.currentUser!.uid ? "You: ${_timeService.truncateText(data['text'], 25)}   .$time" : "${_timeService.truncateText(data['text'], 20)}   .$time" ;
+            return messageSender == _auth.currentUser!.uid ? "You: ${_timeService.truncateText(data['text'], 20)}  .$time" : "${_timeService.truncateText(data['text'], 20)}  .$time" ;
           case 'messageImage':
-            return messageSender == _auth.currentUser!.uid ? "You: send image   .$time"  : 'send image   .$time' ;
+            return messageSender == _auth.currentUser!.uid ? "You: image   .$time"  : ' image  .$time' ;
           case 'audio':
-               return messageSender == _auth.currentUser!.uid ? "You: send message vocale   .$time"  : 'send message vocale   .$time' ;
+               return messageSender == _auth.currentUser!.uid ? "You: message vocale   .$time"  : ' message vocale  .$time' ;
           default:
             return 'message';
         }
@@ -61,9 +61,9 @@ class _FriendsScreenState extends State<FriendsScreen> {
       body: StreamBuilder <DocumentSnapshot>(
         stream: _firestore.collection('users').doc(_auth.currentUser!.uid).snapshots(),
         builder: (context , snapshot){
-        if (snapshot.connectionState == ConnectionState.waiting) {
-             return const CircularProgressIndicator();
-        }
+        // if (snapshot.connectionState == ConnectionState.waiting) {
+        //      return const CircularProgressIndicator();
+        // }
 
         if (snapshot.hasError) {
             return const Text('Something went wrong');
@@ -75,6 +75,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
         //  List friends = snapshot!.data?['friends'];
          List <Widget> friendsList  = [];
          
+
          for (var friend in snapshot!.data?['friends']){
           
           friendsList.add   (
@@ -95,16 +96,18 @@ class _FriendsScreenState extends State<FriendsScreen> {
                child: Padding(
                  padding: const EdgeInsets.only(top : 20),
                  child: StreamBuilder<String>(
-                  stream: getLastMessage(_auth.currentUser!.uid , friend),
+                  stream: getLastMessage(_auth.currentUser?.uid ?? 'user' , friend),
                   builder: (context , messageSnapshot){
 
                     if (messageSnapshot.hasError){
                       return const Text('no message');
                     }
-                    return UserWidget(
-                      user: friend , 
-                      userImageRaduis: 22,
-                      text: messageSnapshot.data ?? 'no message');
+                    return Expanded(
+                      child: UserWidget(
+                        user: friend , 
+                        userImageRaduis: 22,
+                        text: messageSnapshot.data ?? 'no message'),
+                    );
                   }
                    ),//
                )));

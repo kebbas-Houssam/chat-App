@@ -1,3 +1,4 @@
+import 'package:chatapp/screens/chats_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -17,9 +18,9 @@ class _UserStatusCirculState extends State<UserStatusCircul> {
     return StreamBuilder<DocumentSnapshot>(
       stream: _firestore.collection('users').doc(widget.userId).snapshots(),
       builder: (context , snapshot){
-        if (snapshot.connectionState == ConnectionState.waiting) {
-             return const CircularProgressIndicator();
-        }
+        // if (snapshot.connectionState == ConnectionState.waiting) {
+        //      return Sckelton2(raduis: 60,);
+        // }
 
         if (snapshot.hasError) {
             return const Text('Something went wrong');

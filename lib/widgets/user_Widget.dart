@@ -1,4 +1,6 @@
 import 'package:chatapp/screens/chat_screen.dart';
+import 'package:chatapp/screens/chats_screen.dart';
+import 'package:chatapp/widgets/shimmer.dart';
 import 'package:chatapp/widgets/user_status_circul.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -19,7 +21,7 @@ class UserWidget extends StatelessWidget {
       stream: _firestore.collection('users').doc(user).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
+          return UserWidgetShimmer();
         }
 
         if (snapshot.hasError) {
