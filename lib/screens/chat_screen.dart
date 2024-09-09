@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:chatapp/screens/groupDetails.dart';
 import 'package:chatapp/services/audio_message_controlle.dart';
 import 'package:chatapp/services/image_service.dart';
@@ -50,7 +49,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final Map <String , dynamic > data = ModalRoute.of(context)!.settings.arguments as Map <String , dynamic>;
     
     bool isGroupMessage = data['type'] == 'user' ? false : true;
-  
+    List members = data['members'];
     return Provider<Map <String ,dynamic> >(
       create : (context)=> data,
       
@@ -81,7 +80,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 :SizedBox.shrink(),
               ],
               
-              title: data['type'] == 'group' ? GroupWidget(group: data['id'] as String , text : '')
+              title: data['type'] == 'group' ? GroupWidget(group: data['id'] as String , text : '${members.length} members')
                                              : UserWidget(user: data['id'] as String, userImageRaduis: 25,text: data['lastSeen'] ),
                                             
             ),
@@ -216,30 +215,37 @@ class MessageStreamBuilder extends StatelessWidget {
                   final sender = _auth.currentUser!.uid;
                   late bool noRebuildMessage = true ;
                   List members = [];
-
+                 
                   if (data['type'] == 'user' ) {
-                    members = [data['id']]  ;
-                  } else 
-                     members = data['members'];
-                  
+                    members.add(data['id'])  ;
+                  } else {
+                    members .addAll(data['members']);
+                  }
+
+                  // if (data['type'] == 'user' ) {
+                  //   members= [data['id']] ;
+                  // } else {
+                  //   members = data['members'];
+                  // }
                   
                   final List receivers = msg.get('receiver');
 
                   for (var member in members){
-                    if (receivers != null && receivers.isNotEmpty)
+                    if (receivers.isNotEmpty)
+                      
+                      for(var receiver in receivers ){
                     
-                    for(var receiver in receivers ){
-                    // if (sender != member )
-                    
+
                     if (((sender == msg.get('sender') && member == receiver && noRebuildMessage) || ((sender == receiver && member == msg.get('sender')))) && (data['id'] == msg.get('groupeId')  || data['type'] == 'user')){
                     noRebuildMessage = false;
+                    
                     final text = msg.get('text');
                     final type = msg.get('type');
                     
                     final bool showMessage = ( msg.get('isGroupMessage') && data['type'] == 'group') 
                                             || (!msg.get('isGroupMessage') && data['type'] == 'user') ;
                     print(showMessage);
-                    final messageWidget = MessageLine(text: text,isMe: sender == msg.get('sender') , showMessage: showMessage,type : type);
+                    final messageWidget = MessageLine(text: text,isMe: sender == msg.get('sender') , showMessage: showMessage,type : type , time: msg.get('time'));
                     messagesWidgets.add(messageWidget);
                     }
                   }

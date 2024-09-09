@@ -65,7 +65,7 @@ class _AudioMessageBubbleState extends State<AudioMessageBubble> {
                 padding: EdgeInsets.zero,
                 constraints: BoxConstraints(),
               ),
-              SizedBox(width: 4),
+              
               Flexible(
                 child: AudioWaveform(),
               ),
@@ -82,7 +82,7 @@ class AudioWaveform extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: List.generate(14, (index) {
+      children: List.generate(11, (index) {
         return Flexible(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 2),

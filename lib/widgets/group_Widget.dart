@@ -1,4 +1,5 @@
 import 'package:chatapp/screens/chat_screen.dart';
+import 'package:chatapp/services/time_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
+  TimeService _timeService = TimeService();
 
 class GroupWidget extends StatelessWidget {
   const GroupWidget({super.key , required this.group , required this.text});
@@ -53,85 +55,82 @@ class GroupLine extends StatelessWidget {
   Widget build(BuildContext context) {
     int restMembers = members.length - 3;
     return 
-      Padding(
-        padding: EdgeInsets.only(top : 30 , left: 20),
-        child: Row(
-          
-          children: [
-            Stack(
-              clipBehavior: Clip.none,
-              children: [
-                  CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Color(0xFFF5F5F5),
-                    child: CircleAvatar(
-                    radius: 22,
-                    backgroundColor: Colors.grey,
-                    backgroundImage: NetworkImage(members[0]['profilePicture']),
-                    ),
-                  ),
-                  Positioned(
-                  left: 20,
+      Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+                CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Color(0xFFF5F5F5),
                   child: CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Color(0xFFF5F5F5),
-                    child: CircleAvatar(
-                    radius: 22,
-                    backgroundColor: Colors.grey,
-                    backgroundImage: NetworkImage(members[1]['profilePicture']),
-                    ),
-                  )
+                  radius: 22,
+                  backgroundColor: Colors.grey,
+                  backgroundImage: NetworkImage(members[0]['profilePicture']),
                   ),
-                  Positioned(
-                  left: 40,
-                  child: restMembers == 0 
-                  ? CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Color(0xFFF5F5F5),
-                    child: CircleAvatar(
-                    radius: 22,
-                    backgroundColor: Colors.grey,
-                    backgroundImage:  NetworkImage(members[2]['profilePicture']),
-                    ),
-                  )
-                  : CircleAvatar(
-                    radius: 24,
-                    backgroundColor: Color(0xFFF5F5F5) ,
-                    child: Container(
-                      height: 44,
-                      width: 44,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF4A4B62),
-                        shape: BoxShape.circle
-                      ),
-                      child: Center(
-                        child: Text('+$restMembers',style: TextStyle(color: Colors.white,fontSize: 16),),
-                      ),
-                    ),
-                  )
+                ),
+                Positioned(
+                left: 20,
+                child: CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Color(0xFFF5F5F5),
+                  child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.grey,
+                  backgroundImage: NetworkImage(members[1]['profilePicture']),
                   ),
-              ],
-            ),
-            SizedBox(width: 55,),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(title , 
-                     style: const TextStyle(
-                     color: Colors.black,
-                     fontSize: 20,
-                     fontWeight: FontWeight.bold),
-                      ),
-                Text( text ,
-                      style: TextStyle( color: Colors.black.withOpacity(0.6), fontWeight: FontWeight.w300 ,fontSize: 15),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1 ,
-                      textDirection: TextDirection.ltr,
                 )
-              ],
-            )
+                ),
+                Positioned(
+                left: 40,
+                child: restMembers == 0 
+                ? CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Color(0xFFF5F5F5),
+                  child: CircleAvatar(
+                  radius: 22,
+                  backgroundColor: Colors.grey,
+                  backgroundImage:  NetworkImage(members[2]['profilePicture']),
+                  ),
+                )
+                : CircleAvatar(
+                  radius: 24,
+                  backgroundColor: Color(0xFFF5F5F5) ,
+                  child: Container(
+                    height: 44,
+                    width: 44,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF4A4B62),
+                      shape: BoxShape.circle
+                    ),
+                    child: Center(
+                      child: Text('+$restMembers',style: TextStyle(color: Colors.white,fontSize: 16),),
+                    ),
+                  ),
+                )
+                ),
             ],
-        ),
+          ),
+          SizedBox(width: 55,),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(_timeService.truncateText(title, 10) , 
+                   style: const TextStyle(
+                   color: Colors.black,
+                   fontSize: 20,
+                   fontWeight: FontWeight.bold),
+                    ),
+              Text( text ,
+                    style: TextStyle( color: Colors.black.withOpacity(0.6), fontWeight: FontWeight.w300 ,fontSize: 15),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1 ,
+                    textDirection: TextDirection.ltr,
+              )
+            ],
+          )
+          ],
       );
     
   }

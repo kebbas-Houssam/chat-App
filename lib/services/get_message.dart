@@ -12,8 +12,9 @@ class GetMessage {
       .orderBy('time', descending: true)
       .snapshots()
       .map((snapshot) {
+
     if (snapshot.docs.isEmpty) {
-      return 'say hi!';
+      return 'no data';
     }
 
     for (var msg in snapshot.docs) {
@@ -47,13 +48,16 @@ class GetMessage {
                } ;
           default:
             return {
+              // 'time' : '',
               'newGroupe' : false,
               'text' : 'message'
             };
         }
       }
+      
     }
     return {
+      // 'time' : '',
       'newGroupe' : true,
       'text' : 'say hi!',
     };
