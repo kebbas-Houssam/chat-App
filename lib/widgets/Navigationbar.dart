@@ -25,36 +25,42 @@ class _NavigationbarState extends State<Navigationbar> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[index],
-      bottomNavigationBar: Container(
-        margin: EdgeInsets.all(20),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(12),
-          child: Container(
+      body:Stack( 
+        children: [
+       _pages[index],
+       Positioned(
+         left: 0,
+         right: 0,
+         bottom: 20,
+         child: Center(
+           child: Container(
+            width: MediaQuery.of(context).size.width * 0.8,
             height: 60,
             decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.3),
-                  spreadRadius: 1,
-                  blurRadius: 5,
-                  offset: Offset(0, 2),
+            borderRadius: BorderRadius.all(Radius.circular(15)),
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey.withOpacity(0.3),
+                spreadRadius: 1,
+                blurRadius: 5,
+                offset: Offset(0, 2),
+              ),
+            ],
+                 ),
+                 child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildNavItem(0, "CHAT", Icons.chat_bubble_outline, Icons.chat_bubble),
+              _buildNavItem(1, "GROUPS", Icons.people_alt_outlined, Icons.people_alt),
+              _buildNavItem(2, "SEARCH", Icons.search_outlined, Icons.search),
+            ],
+                 ),
                 ),
-              ],
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildNavItem(0, "CHAT", Icons.chat_bubble_outline, Icons.chat_bubble),
-                _buildNavItem(1, "GROUPS", Icons.people_alt_outlined, Icons.people_alt),
-                _buildNavItem(2, "SEARCH", Icons.search_outlined, Icons.search),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
+         ),
+       )]
+      ));
+
   }
 
   Widget _buildNavItem(int idx, String label, IconData icon, IconData activeIcon) {

@@ -86,9 +86,9 @@ class _VoiceMessageState extends State<VoiceMessage> {
   @override
   Widget build(BuildContext context) {
     return IconButton(
-             icon: Icon(_isRecording ? Icons.stop : Icons.mic ,
-                         color: Color(0xff604CD4),
-                         size: 25,),
+             icon: Icon(_isRecording ? Icons.stop : Icons.mic_none_rounded ,
+                         color: Colors.black,
+                         size: 30,),
              onPressed: () {
                  if (_isRecording) {
                    _stopRecording();

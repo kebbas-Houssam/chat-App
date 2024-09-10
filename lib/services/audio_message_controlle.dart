@@ -57,9 +57,9 @@ class _AudioMessageBubbleState extends State<AudioMessageBubble> {
             children: [
               IconButton(
                 icon: Icon(
-                  isPlaying ? Icons.pause : Icons.play_arrow,
-                  color: Colors.white,
-                  size: 25,
+                  isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded,
+                  color: Colors.black,
+                  size: 30 ,
                 ),
                 onPressed: togglePlayPause,
                 padding: EdgeInsets.zero,
@@ -82,14 +82,14 @@ class AudioWaveform extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: List.generate(11, (index) {
+      children: List.generate(14, (index) {
         return Flexible(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 2),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(2),
-                color: Colors.white,
+                color: Colors.black,
               ),
               width: 2.5,
               height: 9 + (index % 3) * 9,

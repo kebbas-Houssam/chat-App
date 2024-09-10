@@ -5,23 +5,19 @@ import 'package:chatapp/services/voice_message.dart';
 import 'package:chatapp/widgets/group_Widget.dart';
 import 'package:chatapp/widgets/message_Widget.dart';
 import 'package:chatapp/widgets/user_Widget.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/rendering.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:audioplayers/audioplayers.dart';
 
 
-late AudioPlayer _audioPlayer;
 final _firestore = FirebaseFirestore.instance;
 final _auth = FirebaseAuth.instance;
 
 class ChatScreen extends StatefulWidget {
 
+  // ignore: constant_identifier_names
   static const String ScreenRoute = 'chat_screen';
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -49,35 +45,34 @@ class _ChatScreenState extends State<ChatScreen> {
     final Map <String , dynamic > data = ModalRoute.of(context)!.settings.arguments as Map <String , dynamic>;
     
     bool isGroupMessage = data['type'] == 'user' ? false : true;
-    List members = data['members'];
+    List members = data['members'] ?? [];
     return Provider<Map <String ,dynamic> >(
       create : (context)=> data,
       
       child: Scaffold(
         appBar: PreferredSize(
-          preferredSize: Size.fromHeight(100),
+          preferredSize: const Size.fromHeight(100),
           child: Padding(
             padding: const EdgeInsets.only(top : 20),
             child: AppBar(
               actions: [
+
                 data['type'] == 'group' ?Padding(
                   padding: const EdgeInsets.only(right : 20),
                   child: GestureDetector(
                     onTap: (){
                         Navigator.pushNamed(context, Groupdetails.ScreenRoute ,
-                        arguments: data['id'] != null 
-                        ? data['id']
-                        : null 
+                        arguments: data['id'] 
                   );
                     },
-                    child: Icon(
+                    child: const Icon(
                       Icons.info_sharp,
                       size : 25 ,
-                      color: Color(0xff8074ec),
+                      color: Colors.black,
                       ),
                   ),
                 )
-                :SizedBox.shrink(),
+                :const SizedBox.shrink(),
               ],
               
               title: data['type'] == 'group' ? GroupWidget(group: data['id'] as String , text : '${members.length} members')
@@ -89,95 +84,83 @@ class _ChatScreenState extends State<ChatScreen> {
         body: SafeArea(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            // crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-             Text(data['id'] as String),
-            MessageStreamBuilder(),
+            const MessageStreamBuilder(),
             Padding(
-              padding: const EdgeInsets.only(bottom:30),
+              padding: const EdgeInsets.symmetric(vertical:20),
               child: Row(
-                // crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Container(
+                  IconButton(
+                    onPressed: () async {
+                        pickedImage = await pickImage();  
+                    },
+                    icon: const Icon( 
+                      Icons.add_circle_outlined,
+                      color: Colors.black,
+                      size: 30,
+                      )),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10),
+                    child: Container(
+                      width: (MediaQuery.of(context).size.width)*0.6,
+                      height: 50,
+                        decoration: const BoxDecoration(
+                        color: Colors.black12,
+                        borderRadius: BorderRadius.all(Radius.circular(15))
+                          
+                       ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            VoiceMessage(
+                              sender: _auth.currentUser!.uid,
+                              receiver: data['type'] == 'user' ? [data['id'] ] : data['members'], 
+                              isGroupMessage: isGroupMessage, 
+                              groupeId: data['id'] as String),
                     
-                    width: 0.6*(MediaQuery.of(context).size.width),
-                    height: 50,
-                      decoration: BoxDecoration(
-                        
-                      color: Color(0xffD9D9D9),
-                      borderRadius: BorderRadius.all(Radius.circular(15))
-                        
-                     ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          VoiceMessage(
-                            sender: _auth.currentUser!.uid,
-                            receiver: data['type'] == 'user' ? [data['id'] ] : data['members'], 
-                            isGroupMessage: isGroupMessage, 
-                            groupeId: data['id'] as String),
-                            
-                          IconButton(
-                            onPressed: () async {
-                                pickedImage = await pickImage();  
-                            },
-                            icon: Icon( 
-                              Icons.attach_file_outlined,
-                              color: Color(0xff604CD4),
-                              size: 25,
-                              )),
-
-                          Expanded(
-                              child: TextField(
-                                controller: messageTextController,
-                                onChanged: (value) {
-                                messageText = value;
-                              },
-                            decoration: const InputDecoration(
-                                contentPadding:
-                                  EdgeInsets.symmetric(vertical: 10, horizontal: 5),
-                                  hintText: 'Message...',
-                                  hintStyle: TextStyle(color: Color(0xff717171)),
-                                  border: InputBorder.none),
-                          )),     
-                        ]
+                            Expanded(
+                                child: TextField(
+                                  controller: messageTextController,
+                                  onChanged: (value) {
+                                  messageText = value;
+                                },
+                              decoration: const InputDecoration(
+                                  contentPadding:
+                                    EdgeInsets.symmetric(vertical: 10, horizontal: 5),
+                                    hintText: 'Message...',
+                                    hintStyle: TextStyle(color: Color(0xff717171)),
+                                    border: InputBorder.none),
+                            )),     
+                          ]
+                        ),
                       ),
-                    ),
-                   SizedBox(width: 15,),
-                   Container(
-                    height: 50,
-                    width: 50,
-                    padding: EdgeInsets.all(1), // Thickness of the border
-                    decoration: BoxDecoration(
-                      
-                          borderRadius: BorderRadius.circular(15),
-                              // shape: BoxShape.circle,
-                          color: Color(0xff604CD4),),
-                          child: IconButton(
-                            onPressed: () async {
-                              messageTextController.clear();
-                              List receivers; 
-                                
-                             _firestore.collection('messages').add({
-                                'sender': _auth.currentUser!.uid,
-                                'text': pickedImage == null 
-                                        ? messageText
-                                        :await uploadImage(pickedImage! , 'messageImages'),
-                                'type' : pickedImage == null 
-                                         ? 'messageText' 
-                                         : 'messageImage',       
-                                'receiver' : data['type'] == 'user' ? [data['id']] : data['members'],
-                                'time' : FieldValue.serverTimestamp() ,
-                                'isGroupMessage' : isGroupMessage ,
-                                'groupeId' : data['id'] ,
-                              });
-                            },
-                            icon: Icon(
-                              Icons.send_rounded,
-                              color: Colors.white,),
-                            ),
-                   )
+                  ),
+                   
+                   IconButton(
+                     onPressed: () async {
+                       messageTextController.clear();
+                       List receivers; 
+                         
+                      _firestore.collection('messages').add({
+                         'sender': _auth.currentUser!.uid,
+                         'text': pickedImage == null 
+                                 ? messageText
+                                 :await uploadImage(pickedImage! , 'messageImages'),
+                         'type' : pickedImage == null 
+                                  ? 'messageText' 
+                                  : 'messageImage',       
+                         'receiver' : data['type'] == 'user' ? [data['id']] : data['members'],
+                         'time' : FieldValue.serverTimestamp() ,
+                         'isGroupMessage' : isGroupMessage ,
+                         'groupeId' : data['id'] ,
+                       });
+                     },
+                     icon: const Icon(
+                       Icons.send_rounded,
+                       color: Colors.black,
+                       size : 30,),
+                     )
                 ],
               ),
             ),
@@ -222,16 +205,10 @@ class MessageStreamBuilder extends StatelessWidget {
                     members .addAll(data['members']);
                   }
 
-                  // if (data['type'] == 'user' ) {
-                  //   members= [data['id']] ;
-                  // } else {
-                  //   members = data['members'];
-                  // }
-                  
                   final List receivers = msg.get('receiver');
 
                   for (var member in members){
-                    if (receivers.isNotEmpty)
+                    if (receivers.isNotEmpty){
                       
                       for(var receiver in receivers ){
                     
@@ -241,16 +218,22 @@ class MessageStreamBuilder extends StatelessWidget {
                     
                     final text = msg.get('text');
                     final type = msg.get('type');
-                    
+                    int time =  msg.get('time')!= null ? msg.get('time').millisecondsSinceEpoch
+                                                       : 0;           
                     final bool showMessage = ( msg.get('isGroupMessage') && data['type'] == 'group') 
                                             || (!msg.get('isGroupMessage') && data['type'] == 'user') ;
-                    print(showMessage);
-                    final messageWidget = MessageLine(text: text,isMe: sender == msg.get('sender') , showMessage: showMessage,type : type , time: msg.get('time'));
+                    
+                    final messageWidget = MessageLine(text: text,
+                                                      isMe: sender == msg.get('sender'),
+                                                      showMessage: showMessage,
+                                                      type : type , 
+                                                      time:  time );
                     messagesWidgets.add(messageWidget);
                     }
                   }
                 }
               }
+            }
                  return Expanded(
                    child: ListView(
                     reverse: true,
