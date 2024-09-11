@@ -14,7 +14,10 @@ class GetMessage {
       .map((snapshot) {
 
     if (snapshot.docs.isEmpty) {
-      return 'no data';
+      return {
+        'newGroupe' : true,
+        'text' : 'say hi!'
+      };
     }
 
     for (var msg in snapshot.docs) {
@@ -32,8 +35,8 @@ class GetMessage {
             return {
                   'newGroupe' : false,
                   'time' : messageTime,
-                  'text': messageSender == _auth.currentUser!.uid ? "You: ${_timeService.truncateText(data['text'], 20)}  .$time" 
-                                                                  : "${_timeService.truncateText(data['text'], 20)}  .$time"  };
+                  'text': messageSender == _auth.currentUser!.uid ? "You: \u202A ${_timeService.truncateText(data['text'], 20) } \u202C  .$time" 
+                                                                  : " \u202A ${_timeService.truncateText(data['text'], 20)} \u202C  .$time"  };
           case 'messageImage':
             return {
                 'newGroupe' : false,

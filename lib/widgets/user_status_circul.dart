@@ -18,16 +18,14 @@ class _UserStatusCirculState extends State<UserStatusCircul> {
     return StreamBuilder<DocumentSnapshot>(
       stream: _firestore.collection('users').doc(widget.userId).snapshots(),
       builder: (context , snapshot){
-        // if (snapshot.connectionState == ConnectionState.waiting) {
-        //      return Sckelton2(raduis: 60,);
-        // }
 
         if (snapshot.hasError) {
-            return const Text('Something went wrong');
+          
+            return const SizedBox.shrink();
         }
 
         if (!snapshot.hasData ) {
-          return const Text('No data found');
+          return const SizedBox.shrink(); // no data found
         }
         final data = snapshot.data ;
         final raduis = widget.userPictureRaduis;

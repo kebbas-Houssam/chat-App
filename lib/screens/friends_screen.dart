@@ -2,6 +2,7 @@ import 'package:chatapp/screens/chat_screen.dart';
 import 'package:chatapp/services/get_message.dart';
 import 'package:chatapp/services/time_service.dart';
 import 'package:chatapp/widgets/user_Widget.dart';
+import 'package:chatapp/widgets/user_active_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -32,20 +33,17 @@ class _FriendsScreenState extends State<FriendsScreen> {
       body: StreamBuilder <DocumentSnapshot>(
         stream: _firestore.collection('users').doc(_auth.currentUser!.uid).snapshots(),
         builder: (context , snapshot){
-        // if (snapshot.connectionState == ConnectionState.waiting) {
-        //      return const CircularProgressIndicator();
-        // }
 
         if (snapshot.hasError) {
-            return const Text('Something went wrong');
+            print('Something went wrong');
+            return const SizedBox.shrink();
         }
 
         if (!snapshot.hasData ) {
-          return const Text('No users found');
+          print('No users found');
+          return const SizedBox.shrink();
         }
-        //  List friends = snapshot!.data?['friends'];
          List <Widget> friendsList  = [];
-         
 
          for (var friend in snapshot!.data?['friends']){
             friendsList.add (
@@ -64,25 +62,27 @@ class _FriendsScreenState extends State<FriendsScreen> {
                      : 'default'   );
               },
                child: Padding(
-                 padding: const EdgeInsets.only(top : 20),
+                 padding: const EdgeInsets.only(top : 15),
                  child: StreamBuilder<dynamic>(
                  stream: _getMessage.getLastMessage(_auth.currentUser?.uid ?? 'user', friend,friend),
                  builder: (context, messageSnapshot) {
                    if (messageSnapshot.hasError) {
-                     return const Text('No message');
+                    
+                     print('No message');
                    }
                
                    if (!messageSnapshot.hasData || messageSnapshot.data == null) {
-                     return const Text('No message');
+                     print('No message');
                    }
-               
+                   
+                  
                    Map<String, dynamic>? lastMessage = messageSnapshot.data as Map<String, dynamic>?;
                
                    return Expanded(
                      child: UserWidget(
                        user: friend,
-                       userImageRaduis: 22,
-                       text: lastMessage != null && lastMessage['text'] != null ? lastMessage['text'] : 'No message',
+                       userImageRaduis: 23,
+                       text: lastMessage != null &&  lastMessage['text'] != null ?  lastMessage['text'] : 'No message',
                      ),
                    );
                  },
@@ -90,8 +90,7 @@ class _FriendsScreenState extends State<FriendsScreen> {
 
                )));
          }
-        return
-        ListView(
+        return ListView(
           children: friendsList,
         );
         }),

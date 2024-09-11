@@ -1,4 +1,5 @@
 import 'package:chatapp/services/audio_message_controlle.dart';
+import 'package:chatapp/services/fullScreenImage.dart';
 import 'package:chatapp/services/time_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -24,13 +25,91 @@ class MessageLine extends StatelessWidget {
             const SizedBox(height: 5,) ,
             showMessage
              ?type == 'messageImage'
-              ?Image.network(
-                  text, 
-                  width: 100, 
-                  height: 200
-                )
+              ?Stack(
+                children: [
+                GestureDetector(
+                    onTap: () {
+                    Navigator.push(
+                       context,
+                       MaterialPageRoute(
+                         builder: (context) => FullScreenImage(imageUrl: text),
+                       ),
+                     );
+                   },
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(15),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        maxWidth: 260, // الحد الأقصى للعرض
+                        maxHeight: 250, 
+                      ),
+                      child: Image.network(
+                          text, 
+                          fit: BoxFit.contain,
+                          loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent? loadingProgress) {
+                            if (loadingProgress == null) {
+                              return child;
+                            }
+                            return Container(
+                                height: 250,
+                                width: 150,
+                                decoration: BoxDecoration(
+                                  color: Colors.black.withOpacity(0.1)
+                                ),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    value: loadingProgress.expectedTotalBytes != null
+                                        ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                        : null,
+                                  ),
+                                ),
+                              ); 
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Text('erro in loading image');
+                          },
+                        ),
+                    ),
+                  ),
+                ),
+                isMe 
+                ?Positioned(
+                  bottom:5,
+                  right: 5,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.5),
+                      borderRadius: BorderRadius.all(Radius.circular(8))
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5 , vertical: 3),
+                        child: Text(_timeService.formatMessageTime(time),
+                                    style: TextStyle(fontSize: 10 , fontWeight: FontWeight.w600 ),),
+                      ),
+                    ), 
+                  )
+                  )
+                  :Positioned(
+                  bottom:5,
+                  left: 5,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.grey.withOpacity(0.5),
+                      borderRadius: BorderRadius.all(Radius.circular(8))
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 5 , vertical: 3),
+                        child: Text(_timeService.formatMessageTime(time),
+                                    style: TextStyle(fontSize: 10 , fontWeight: FontWeight.w600 ),),
+                      ),
+                    ), 
+                  )
+                  )
+                ],
+              )
               : Container(
-                
                  constraints: BoxConstraints(
                    maxWidth: MediaQuery.of(context).size.width * 0.75, // زيادة العرض الأقصى
                  ),

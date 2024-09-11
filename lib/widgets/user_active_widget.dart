@@ -68,11 +68,12 @@ class _UserActiveWidgetState extends State<UserActiveWidget> {
         }
 
         if (snapshot.hasError) {
-          return const Text('Something went wrong');
+          
+          print('Something went wrong');
         }
 
         if (!snapshot.hasData) {
-          return const Text('No data found');
+          print('No data found');
         }
 
         final List userFriends = snapshot.data!['friends'];
@@ -97,7 +98,8 @@ class _UserActiveWidgetState extends State<UserActiveWidget> {
             }
 
             if (snapshot.hasError) {
-              return const Text('Something went wrong');
+              
+              print('Something went wrong');
             }
 
             if (!snapshot.hasData || snapshot.data!.isEmpty) {

@@ -20,7 +20,7 @@ import 'package:image_picker/image_picker.dart';
 Future<String> uploadImage(XFile image , String path) async {
   File file = File(image.path);
   try {
-    String fileName = '$path/{DateTime.now().millisecondsSinceEpoch}.png';//user_images
+    String fileName = '$path/${DateTime.now().millisecondsSinceEpoch}.png';//user_images
     Reference ref = FirebaseStorage.instance.ref().child(fileName);
     await ref.putFile(file);
     return await ref.getDownloadURL();

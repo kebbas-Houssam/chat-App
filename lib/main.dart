@@ -1,6 +1,7 @@
 import 'package:chatapp/screens/add_user_in_group.dart';
 import 'package:chatapp/screens/chat_screen.dart';
 import 'package:chatapp/screens/chats_screen.dart';
+import 'package:chatapp/screens/friends_screen.dart';
 import 'package:chatapp/screens/groupDetails.dart';
 import 'package:chatapp/screens/login_screen.dart';
 import 'package:chatapp/screens/notifications_screen.dart';
@@ -33,8 +34,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Message Me',
       theme: ThemeData(
+        progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: Color(0xffFFC107), // حدد اللون الذي تريده هنا
+         ),
         scaffoldBackgroundColor: Color(0xFFF5F5F5),
-        appBarTheme: AppBarTheme(
+        appBarTheme: const AppBarTheme(
           backgroundColor: Color(0xFFF5F5F5)
         ),
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
@@ -44,8 +48,8 @@ class MyApp extends StatelessWidget {
       initialRoute: _auth.currentUser != null 
       ? Navigationbar.ScreenRoute
       : WelcomeScreen.ScreenRoute,
-
-
+    
+    
       routes: {
         WelcomeScreen.ScreenRoute:(context) => WelcomeScreen(),
         LoginScreen.ScreenRoute:(context) => LoginScreen(),

@@ -1,5 +1,4 @@
 import 'package:chatapp/screens/groupDetails.dart';
-import 'package:chatapp/services/audio_message_controlle.dart';
 import 'package:chatapp/services/image_service.dart';
 import 'package:chatapp/services/voice_message.dart';
 import 'package:chatapp/widgets/group_Widget.dart';
@@ -46,6 +45,7 @@ class _ChatScreenState extends State<ChatScreen> {
     
     bool isGroupMessage = data['type'] == 'user' ? false : true;
     List members = data['members'] ?? [];
+
     return Provider<Map <String ,dynamic> >(
       create : (context)=> data,
       
@@ -55,6 +55,11 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Padding(
             padding: const EdgeInsets.only(top : 20),
             child: AppBar(
+              flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F5F5)
+              ),
+            ),
               actions: [
 
                 data['type'] == 'group' ?Padding(
@@ -141,12 +146,14 @@ class _ChatScreenState extends State<ChatScreen> {
                      onPressed: () async {
                        messageTextController.clear();
                        List receivers; 
-                         
+                       if (messageText!= null ) {
+                         if (messageText!.isNotEmpty || pickedImage != null ){
                       _firestore.collection('messages').add({
                          'sender': _auth.currentUser!.uid,
                          'text': pickedImage == null 
                                  ? messageText
-                                 :await uploadImage(pickedImage! , 'messageImages'),
+                                 : await uploadImage(pickedImage! , 'messageImages'),
+                                 
                          'type' : pickedImage == null 
                                   ? 'messageText' 
                                   : 'messageImage',       
@@ -154,7 +161,14 @@ class _ChatScreenState extends State<ChatScreen> {
                          'time' : FieldValue.serverTimestamp() ,
                          'isGroupMessage' : isGroupMessage ,
                          'groupeId' : data['id'] ,
+                       }).whenComplete((){
+                          pickedImage = null;
                        });
+                       
+                    }
+                    
+                 }
+                       
                      },
                      icon: const Icon(
                        Icons.send_rounded,

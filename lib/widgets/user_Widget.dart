@@ -1,8 +1,11 @@
+import 'package:chatapp/services/time_service.dart';
 import 'package:chatapp/widgets/shimmer.dart';
 import 'package:chatapp/widgets/user_status_circul.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
+  TimeService _timeService = TimeService();
 
 class UserWidget extends StatelessWidget {
   UserWidget({super.key , required this.user ,required this.userImageRaduis ,required this.text });
@@ -12,7 +15,6 @@ class UserWidget extends StatelessWidget {
   
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
-
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<DocumentSnapshot>(
@@ -23,7 +25,7 @@ class UserWidget extends StatelessWidget {
         }
 
         if (snapshot.hasError) {
-          return const Text('Something went wrong');
+          print('Something went wrong');
         }
 
         if (!snapshot.hasData) {
@@ -72,7 +74,7 @@ class UserLine extends StatelessWidget {
                     fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 0,),
-                Text( text ,
+                Text(  text ,
                       style: TextStyle( color: Colors.black.withOpacity(0.6), fontWeight: FontWeight.w300 ,fontSize: 15),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1 ,

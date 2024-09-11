@@ -1,5 +1,6 @@
 import 'package:chatapp/screens/chat_screen.dart';
 import 'package:chatapp/services/time_service.dart';
+import 'package:chatapp/widgets/shimmer.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,9 +21,9 @@ class GroupWidget extends StatelessWidget {
       stream: _firestore.collection('groups').doc(group).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        }
+          return const GroupeWidgetShimmer();
 
+        }
         if (snapshot.hasError) {
           return const Text('Something went wrong');
         }

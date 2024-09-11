@@ -79,12 +79,9 @@ String formatMessageTime(int? timestamp) {
 String truncateText(String text, int length) {
   if (text.length > length) {
      String truncated =  text.substring(0, length) + '...';
-     return '\u202A' + truncated + '\u202C';
+     return   truncated ;
   } else {
     return text;
   }
 }
-
-
-  
 }

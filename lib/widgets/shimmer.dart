@@ -10,8 +10,6 @@ class UserWidgetShimmer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Row(
-      // crossAxisAlignment: CrossAxisAlignment.start,
-      // mainAxisAlignment: MainAxisAlignment.start,
       children: [
         Sckelton2(raduis: 50,),
         SizedBox(width: 12,),
@@ -23,6 +21,28 @@ class UserWidgetShimmer extends StatelessWidget {
              Sckelton(height: 14,width: 150,),
           ]
           
+        )
+      ],
+    );
+  }
+}
+
+class GroupeWidgetShimmer extends StatelessWidget {
+  const GroupeWidgetShimmer({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Row(
+      children: [
+        GroupeImagesShimmer(),
+        SizedBox(width : 60),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+             Sckelton(height: 14,width: 100,),
+             SizedBox(height: 12,),
+             Sckelton(height: 14,width: 150,),
+          ]   
         )
       ],
     );
@@ -74,6 +94,62 @@ class Sckelton extends StatelessWidget {
           borderRadius: BorderRadius.all(const Radius.circular(4))
         ),
       ),
+    );
+  }
+}
+class GroupeImagesShimmer extends StatelessWidget {
+  const GroupeImagesShimmer({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none ,
+      children: [
+        Positioned( 
+          child: Shimmer.fromColors(
+            baseColor: Colors.black.withOpacity(1),
+            highlightColor: Colors.black.withOpacity(0.3),
+            child: CircleAvatar(
+              radius: 22,
+              backgroundColor: Colors.black.withOpacity(0.1),
+            ),
+          ),
+        ),
+        Positioned(
+          left: 20, 
+          child: CircleAvatar(
+            radius: 24,
+            backgroundColor: Color(0xFFF5F5F5),
+            child: Shimmer.fromColors(
+              baseColor: Colors.black.withOpacity(1),
+              highlightColor: Colors.black.withOpacity(0.3),
+              child: CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.black.withOpacity(0.1),
+              ),
+            )
+          ),
+        ),
+        Positioned(
+          left: 40, 
+          child: CircleAvatar(
+            radius: 24,
+            backgroundColor: Color(0xFFF5F5F5),
+            child: Shimmer.fromColors(
+              baseColor: Colors.black.withOpacity(1),
+              highlightColor: Colors.black.withOpacity(0.3),
+              child: CircleAvatar(
+                radius: 22,
+                backgroundColor: Colors.black.withOpacity(0.1),
+              ),
+            )
+          ),
+        ),
+        SizedBox(width: 15,),
+    
+      ],
     );
   }
 }

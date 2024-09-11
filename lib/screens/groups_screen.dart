@@ -32,6 +32,11 @@ class _GroupsScreenState extends State<GroupsScreen> {
         child: Padding(
           padding: const EdgeInsets.only( left : 10 ,right: 20 ,top: 30),
           child: AppBar(
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F5F5)
+              ),
+            ),
             title: const Text(
               'Groups',
               style: TextStyle(fontSize: 35, fontWeight: FontWeight.bold),
@@ -59,9 +64,6 @@ class _GroupsScreenState extends State<GroupsScreen> {
       body: StreamBuilder<QuerySnapshot>(
         stream: _firestore.collection('groups').snapshots(),
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
 
           if (snapshot.hasError) {
             return const Center(child: Text('error'));
@@ -83,9 +85,7 @@ class _GroupsScreenState extends State<GroupsScreen> {
                 return StreamBuilder<Map<String, dynamic>>(
                   stream: _getGroupLastMessageStream(group.id, membersId),
                   builder: (context, messageSnapshot) {
-                    if (messageSnapshot.connectionState == ConnectionState.waiting) {
-                      return const CircularProgressIndicator();
-                    }
+                    
 
                     Map<String, dynamic> lastMessage = messageSnapshot.data ?? {'text': 'no messages', 'newGroupe': true};
 

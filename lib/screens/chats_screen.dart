@@ -48,6 +48,11 @@ class _ChatsScreenState extends State<ChatsScreen> {
         child: Padding(
           padding: const EdgeInsets.only(top : 20, left: 20),
           child: AppBar(
+            flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                color: Color(0xFFF5F5F5)
+              ),
+            ),
             automaticallyImplyLeading: false,
             title: GestureDetector(
                     onTap: (){
@@ -55,7 +60,6 @@ class _ChatsScreenState extends State<ChatsScreen> {
                         },
                     child: UserWidget(user : _auth.currentUser!.uid , userImageRaduis: 25, text: "Hello,",)),
           actions: [
-           
            Padding(
               padding: const EdgeInsets.only(right: 20),
               child: IconButton(
@@ -84,10 +88,15 @@ class _ChatsScreenState extends State<ChatsScreen> {
           
           SizedBox(
             height:90 ,
-            child: UserActiveWidget()), //i need show it only if users online
+            child: Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: UserActiveWidget(),
+            )),
+            
+             
             const Expanded(
             child: Padding(
-              padding: EdgeInsets.only(left :30),
+              padding: EdgeInsets.only(left :20),
               child: FriendsScreen(),
             ))
           
@@ -98,4 +107,6 @@ class _ChatsScreenState extends State<ChatsScreen> {
     );
   }
 }
+
+
 
