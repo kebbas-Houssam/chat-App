@@ -107,6 +107,27 @@ class _ChatsScreenState extends State<ChatsScreen> {
     );
   }
 }
+class WavePainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    Paint paint = Paint()
+      ..color = Colors.white
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = 4;
+
+    // رسم الأمواج الصوتية بشكل بسيط
+    double spacing = 6.0;
+    for (double i = 0; i < size.width; i += spacing) {
+      double height = (i % (spacing * 4) == 0) ? size.height * 0.6 : size.height * 0.4;
+      canvas.drawLine(Offset(i, size.height), Offset(i, size.height - height), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true; // يتم إعادة الرسم للتأثير
+  }
+}
 
 
 

@@ -13,8 +13,7 @@ class FullScreenImage extends StatelessWidget {
       body: GestureDetector(
           onTap: () => Navigator.pop(context),
         child: Stack(
-          fit: StackFit.expand,
-          
+          fit: StackFit.expand,  
           children: [
             Image.network(
               imageUrl,

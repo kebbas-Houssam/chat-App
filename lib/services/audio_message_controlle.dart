@@ -1,3 +1,4 @@
+import 'package:chatapp/widgets/wave_animation_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 
@@ -67,7 +68,8 @@ class _AudioMessageBubbleState extends State<AudioMessageBubble> {
               ),
               
               Flexible(
-                child: AudioWaveform(),
+                child: isPlaying ? const MovingSoundWaves(waveColor: Colors.black , height: 40, width: 100) 
+                                 : AudioWaveform(waveColor: Colors.black ,width: 14),
               ),
             ],
           ),
@@ -77,19 +79,37 @@ class _AudioMessageBubbleState extends State<AudioMessageBubble> {
   }
 }
 
-class AudioWaveform extends StatelessWidget {
+class AudioWaveform extends StatefulWidget {
+
+  final Color waveColor;
+  // final double height;
+  final int width; 
+   AudioWaveform({
+    Key? key,
+    required this.waveColor,
+    // required this.height,
+    required this.width, // Default width of 120px
+  });
+
+  @override
+  State<AudioWaveform> createState() => _AudioWaveformState();
+}
+
+class _AudioWaveformState extends State<AudioWaveform> {
+
+  
   @override
   Widget build(BuildContext context) {
     return Row(
       mainAxisSize: MainAxisSize.min,
-      children: List.generate(14, (index) {
+      children: List.generate(widget.width , (index) {
         return Flexible(
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: 2),
             child: Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(2),
-                color: Colors.black,
+                color: widget.waveColor,
               ),
               width: 2.5,
               height: 9 + (index % 3) * 9,

@@ -6,7 +6,14 @@ import 'package:flutter/material.dart';
 
 TimeService _timeService = TimeService();
 class MessageLine extends StatelessWidget {
-  const MessageLine({required this.text  ,required this.isMe , super.key , required this.showMessage , required this.type , required this.time});
+  const MessageLine({super.key , 
+                     required this.text,
+                     required this.isMe , 
+                     required this.showMessage , 
+                     required this.type , 
+                     required this.time,
+                     
+                     });
   final String type;
   final String text;
   final bool isMe;
@@ -144,7 +151,7 @@ class MessageLine extends StatelessWidget {
                              Padding(
                                padding: const EdgeInsets.symmetric(horizontal: 8 , vertical: 3),
                                child: Text(_timeService.formatMessageTime(time),
-                                    style: TextStyle(fontSize: 10 , fontWeight: FontWeight.w500 ),),
+                                    style: const TextStyle(fontSize: 10 , fontWeight: FontWeight.w500 ),),
                              ),
                            ],
                          )
@@ -154,7 +161,7 @@ class MessageLine extends StatelessWidget {
                        children: [
                          AudioMessageBubble(audioUrl: text),
                          Text(_timeService.formatMessageTime(time),
-                              style: TextStyle(fontSize: 10 , fontWeight: FontWeight.w500 ),),
+                              style: const TextStyle(fontSize: 10 , fontWeight: FontWeight.w500 ),),
                        ],
                      )
                      : const SizedBox.shrink(),

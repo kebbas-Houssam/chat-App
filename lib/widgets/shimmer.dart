@@ -41,7 +41,7 @@ class GroupeWidgetShimmer extends StatelessWidget {
           children: [
              Sckelton(height: 14,width: 100,),
              SizedBox(height: 12,),
-             Sckelton(height: 14,width: 150,),
+             Sckelton(height: 14,width: 100,),
           ]   
         )
       ],

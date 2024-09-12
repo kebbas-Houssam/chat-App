@@ -21,7 +21,7 @@ class GroupWidget extends StatelessWidget {
       stream: _firestore.collection('groups').doc(group).snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const GroupeWidgetShimmer();
+          return Expanded(child: const GroupeWidgetShimmer());
 
         }
         if (snapshot.hasError) {

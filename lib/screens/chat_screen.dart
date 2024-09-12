@@ -40,6 +40,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
     Widget build(BuildContext context) {
+     
+
     
     final Map <String , dynamic > data = ModalRoute.of(context)!.settings.arguments as Map <String , dynamic>;
     
@@ -163,11 +165,13 @@ class _ChatScreenState extends State<ChatScreen> {
                          'groupeId' : data['id'] ,
                        }).whenComplete((){
                           pickedImage = null;
+                          messageText = null;
                        });
                        
-                    }
+                     }
+                    } else if (pickedImage == null){
                     
-                 }
+                    }
                        
                      },
                      icon: const Icon(
@@ -233,7 +237,7 @@ class MessageStreamBuilder extends StatelessWidget {
                     final text = msg.get('text');
                     final type = msg.get('type');
                     int time =  msg.get('time')!= null ? msg.get('time').millisecondsSinceEpoch
-                                                       : 0;           
+                                                       : DateTime.now().millisecondsSinceEpoch ;           
                     final bool showMessage = ( msg.get('isGroupMessage') && data['type'] == 'group') 
                                             || (!msg.get('isGroupMessage') && data['type'] == 'user') ;
                     
