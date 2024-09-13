@@ -26,12 +26,6 @@ class _AudioMessageBubbleState extends State<AudioMessageBubble> {
     });
   }
 
-  @override
-  void dispose() {
-    _audioPlayer.dispose();
-    super.dispose();
-  }
-
   Future<void> togglePlayPause() async {
     if (isPlaying) {
       await _audioPlayer.pause();
@@ -43,6 +37,11 @@ class _AudioMessageBubbleState extends State<AudioMessageBubble> {
     setState(() {
       isPlaying = !isPlaying;
     });
+  }
+    @override
+  void dispose() {
+    _audioPlayer.dispose();
+    super.dispose();
   }
 
   @override

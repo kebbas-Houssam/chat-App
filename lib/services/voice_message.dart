@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:math';
+import 'dart:async';
 import 'package:chatapp/services/audio_message_controlle.dart';
 import 'package:chatapp/widgets/wave_animation_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -27,7 +28,10 @@ class VoiceMessage extends StatefulWidget {
 
 class _VoiceMessageState extends State<VoiceMessage> {
   bool _isRecording = false;
- 
+  Stopwatch _stopwatch = Stopwatch();
+  Timer? _timer;
+  String formattedTime = "00:00";
+  String? voiceMessageTime;
  
   late AudioRecorder _audioRecorder;
   String? _recordingFilePath;
@@ -38,6 +42,41 @@ class _VoiceMessageState extends State<VoiceMessage> {
     _audioRecorder = AudioRecorder();
   }
 
+
+   void startTimer() {
+    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      setState(() {
+        formattedTime = _formatDuration(_stopwatch.elapsed);
+      });
+    });
+  }
+
+  String _formatDuration(Duration duration) {
+    String twoDigits(int n) => n.toString().padLeft(2, "0");
+    String minutes = twoDigits(duration.inMinutes.remainder(60));
+    String seconds = twoDigits(duration.inSeconds.remainder(60));
+    return "$minutes:$seconds";
+  }
+
+  void startTimerCounting() {
+    _stopwatch.start();
+    startTimer();
+  }
+  
+   void stopTimer() {
+    _stopwatch.stop();
+    _timer?.cancel();
+  }
+
+  void resetTimer() {
+    _stopwatch.reset();
+    setState(() {
+      voiceMessageTime = formattedTime;
+      formattedTime = "00:00";
+    });
+  }
+
+  
   Future<void> _startRecording() async {
     try {
       if (await _audioRecorder.hasPermission()) {
@@ -88,6 +127,7 @@ class _VoiceMessageState extends State<VoiceMessage> {
         'receiver': receiver, //user id
         'isGroupMessage': isGroupMessage,
         'groupeId': groupeId,
+        'voiceMessageTime' : voiceMessageTime , 
       });
 
       print('Audio message sent successfully');
@@ -95,7 +135,11 @@ class _VoiceMessageState extends State<VoiceMessage> {
       print('Error uploading audio: $e');
     }
   }
-
+   @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -112,7 +156,7 @@ class _VoiceMessageState extends State<VoiceMessage> {
                   children: [
                     
                     IconButton(
-                      // alignment: Alignment.centerLeft,
+                      alignment: Alignment.centerLeft,
                       icon: _isRecording
                           ? const Icon(
                               Icons.stop_rounded,
@@ -126,6 +170,8 @@ class _VoiceMessageState extends State<VoiceMessage> {
                         } else {
                           _startRecording();
                         }
+                        stopTimer();
+                        resetTimer();
                       },
                     ),
                     const Expanded(
@@ -136,11 +182,11 @@ class _VoiceMessageState extends State<VoiceMessage> {
                               )
                             ),
 
-                    const Padding(
-                      padding: const EdgeInsets.all(10),
+                     Padding(
+                      padding:  const EdgeInsets.all(10),
                       child: Text(
-                        '1:35',
-                        style: TextStyle(color: Colors.white, fontSize: 15),
+                        formattedTime,
+                        style: const TextStyle(color: Colors.white, fontSize: 12),
                       ),
                     )
                   ],
@@ -148,6 +194,7 @@ class _VoiceMessageState extends State<VoiceMessage> {
               )
             : IconButton(
                 onPressed: () {
+                  startTimerCounting();
                   if (_isRecording) {
                     _stopRecording();
                   } else {
