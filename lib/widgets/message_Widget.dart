@@ -12,12 +12,10 @@ class MessageLine extends StatelessWidget {
                      required this.showMessage , 
                      required this.type , 
                      required this.time,
-                     
+                     required this.voiceMessageTime
                      });
-  final String type;
-  final String text;
-  final bool isMe;
-  final bool showMessage;
+  final String type , voiceMessageTime , text;
+  final bool isMe , showMessage;
   final int time;
   
   @override
@@ -159,7 +157,7 @@ class MessageLine extends StatelessWidget {
                      ? Column(
                        crossAxisAlignment: isMe ?CrossAxisAlignment.end : CrossAxisAlignment.start,
                        children: [
-                         AudioMessageBubble(audioUrl: text),
+                         AudioMessageBubble(audioUrl: text ,voiceMessageTime: voiceMessageTime),
                          Text(_timeService.formatMessageTime(time),
                               style: const TextStyle(fontSize: 10 , fontWeight: FontWeight.w500 ),),
                        ],

@@ -237,7 +237,8 @@ class MessageStreamBuilder extends StatelessWidget {
                     final text = msg.get('text');
                     final type = msg.get('type');
                     int time =  msg.get('time')!= null ? msg.get('time').millisecondsSinceEpoch
-                                                       : DateTime.now().millisecondsSinceEpoch ;           
+                                                       : DateTime.now().millisecondsSinceEpoch ;
+                    final voiceMessageTime = type == 'audio' ?msg.get('voiceMessageTime') : '';           
                     final bool showMessage = ( msg.get('isGroupMessage') && data['type'] == 'group') 
                                             || (!msg.get('isGroupMessage') && data['type'] == 'user') ;
                     
@@ -245,7 +246,9 @@ class MessageStreamBuilder extends StatelessWidget {
                                                       isMe: sender == msg.get('sender'),
                                                       showMessage: showMessage,
                                                       type : type , 
-                                                      time:  time );
+                                                      time:  time ,
+                                                      voiceMessageTime : voiceMessageTime ,
+                                                      );
                     messagesWidgets.add(messageWidget);
                     }
                   }
