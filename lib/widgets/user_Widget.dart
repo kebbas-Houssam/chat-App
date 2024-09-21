@@ -73,14 +73,14 @@ class UserLine extends StatelessWidget {
                     fontSize: 20,
                     fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 0,),
-                Text(  text ,
+                text.isNotEmpty
+                ?Text( text ,
                       style: TextStyle( color: Colors.black.withOpacity(0.6), fontWeight: FontWeight.w300 ,fontSize: 15),
                       overflow: TextOverflow.ellipsis,
                       maxLines: 1 ,
                       textDirection: TextDirection.ltr,
                 )
-                
+                :SizedBox.shrink()
               ],
             ),
           ],

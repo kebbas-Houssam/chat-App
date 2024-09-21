@@ -148,8 +148,8 @@ class _ChatScreenState extends State<ChatScreen> {
                      onPressed: () async {
                        messageTextController.clear();
                        List receivers; 
-                       if (messageText!= null ) {
-                         if (messageText!.isNotEmpty || pickedImage != null ){
+                       if ((messageText!= null && messageText!.isNotEmpty  )||  pickedImage != null ) {
+                         
                       _firestore.collection('messages').add({
                          'sender': _auth.currentUser!.uid,
                          'text': pickedImage == null 
@@ -163,12 +163,13 @@ class _ChatScreenState extends State<ChatScreen> {
                          'time' : FieldValue.serverTimestamp() ,
                          'isGroupMessage' : isGroupMessage ,
                          'groupeId' : data['id'] ,
+                         'reactions' : null
                        }).whenComplete((){
                           pickedImage = null;
                           messageText = null;
                        });
                        
-                     }
+                     
                     } else if (pickedImage == null){
                     
                     }
@@ -233,11 +234,16 @@ class MessageStreamBuilder extends StatelessWidget {
 
                     if (((sender == msg.get('sender') && member == receiver && noRebuildMessage) || ((sender == receiver && member == msg.get('sender')))) && (data['id'] == msg.get('groupeId')  || data['type'] == 'user')){
                     noRebuildMessage = false;
-                    
+                    final messageId = msg.id;
                     final text = msg.get('text');
                     final type = msg.get('type');
-                    int time =  msg.get('time')!= null ? msg.get('time').millisecondsSinceEpoch
+
+                    final reactions = msg.get('reactions') ?? []; 
+                    print(' reaction is : $reactions'); 
+                    
+                    int time =  msg.get('time') != null ? msg.get('time').millisecondsSinceEpoch
                                                        : DateTime.now().millisecondsSinceEpoch ;
+                    
                     final voiceMessageTime = type == 'audio' ?msg.get('voiceMessageTime') : '';           
                     final bool showMessage = ( msg.get('isGroupMessage') && data['type'] == 'group') 
                                             || (!msg.get('isGroupMessage') && data['type'] == 'user') ;
@@ -248,6 +254,9 @@ class MessageStreamBuilder extends StatelessWidget {
                                                       type : type , 
                                                       time:  time ,
                                                       voiceMessageTime : voiceMessageTime ,
+                                                      messageId : messageId,
+                                                      userId: _auth.currentUser!.uid,
+                                                      reactions : reactions,
                                                       );
                     messagesWidgets.add(messageWidget);
                     }

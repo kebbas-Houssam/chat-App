@@ -128,6 +128,7 @@ class _VoiceMessageState extends State<VoiceMessage> {
         'isGroupMessage': isGroupMessage,
         'groupeId': groupeId,
         'voiceMessageTime' : voiceMessageTime , 
+        'reactions' : null
       });
 
       print('Audio message sent successfully');
