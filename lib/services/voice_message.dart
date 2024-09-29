@@ -15,9 +15,10 @@ class VoiceMessage extends StatefulWidget {
       required this.sender,
       required this.receiver,
       required this.isGroupMessage,
-      required this.groupeId});
+      required this.groupeId,
+      required this.reply});
 
-  final String sender;
+  final String sender , reply;
   final List receiver;
   final bool isGroupMessage;
   final String groupeId;
@@ -101,7 +102,7 @@ class _VoiceMessageState extends State<VoiceMessage> {
       });
       if (path != null ) {
         await _uploadAudio(File(path), widget.sender, widget.receiver,
-            widget.isGroupMessage, widget.groupeId);
+            widget.isGroupMessage, widget.groupeId ,widget.reply);
       }
       else {print('user cancel sending ');}
     } catch (e) {
@@ -110,7 +111,7 @@ class _VoiceMessageState extends State<VoiceMessage> {
   }
 
   Future<void> _uploadAudio(File audioFile, String sender, List receiver,
-      bool isGroupMessage, String groupeId) async {
+      bool isGroupMessage, String groupeId , String reply) async {
     try {
       String fileName = 'audio_${DateTime.now().millisecondsSinceEpoch}.m4a';
       Reference ref =
@@ -128,7 +129,9 @@ class _VoiceMessageState extends State<VoiceMessage> {
         'isGroupMessage': isGroupMessage,
         'groupeId': groupeId,
         'voiceMessageTime' : voiceMessageTime , 
-        'reactions' : null
+        'reactions' : null,
+        'reply' : reply,
+
       });
 
       print('Audio message sent successfully');

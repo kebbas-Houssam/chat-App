@@ -29,6 +29,23 @@ class _ChatScreenState extends State<ChatScreen> {
   
   XFile? pickedImage ;
   String? messageText;
+  String? selectedMessageId;
+
+  //   void _setMessageText(String text, String messageId) {
+  //   setState(() {
+  //     messageText = text;
+  //     messageTextController.text = text;
+  //     selectedMessageId = messageId;
+  //   });
+  //   _focusTextField();
+  // }
+
+  void _selectMessage(String messageId) {
+    setState(() {
+      selectedMessageId = messageId;
+    });
+    _focusTextField();
+  }
   
   @override
   void initState() {
@@ -99,7 +116,12 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-            MessageStreamBuilder(focusTextField: _focusTextField),
+            MessageStreamBuilder(
+              // focusTextField: _focusTextField
+              //  setMessageText: _setMessageText,
+                selectMessage: _selectMessage,
+                selectedMessageId: selectedMessageId,
+            ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical:20),
               child: Row(
@@ -131,7 +153,8 @@ class _ChatScreenState extends State<ChatScreen> {
                               sender: _auth.currentUser!.uid,
                               receiver: data['type'] == 'user' ? [data['id'] ] : data['members'], 
                               isGroupMessage: isGroupMessage, 
-                              groupeId: data['id'] as String),
+                              groupeId: data['id'] as String,
+                              reply : selectedMessageId ?? ''),
                     
                             Expanded(
                                 child: TextField(
@@ -171,7 +194,8 @@ class _ChatScreenState extends State<ChatScreen> {
                          'time' : FieldValue.serverTimestamp() ,
                          'isGroupMessage' : isGroupMessage ,
                          'groupeId' : data['id'] ,
-                         'reactions' : null
+                         'reactions' : [] ,
+                         'reply' : selectedMessageId ?? '' ,
                        }).whenComplete((){
                           pickedImage = null;
                           messageText = null;
@@ -201,8 +225,16 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class MessageStreamBuilder extends StatelessWidget {
-  final Function focusTextField;
-  const MessageStreamBuilder({super.key , required this.focusTextField});
+  // final Function focusTextField;
+  // final Function(String, String) setMessageText;
+  final Function(String) selectMessage;
+  final String? selectedMessageId;
+  const MessageStreamBuilder({super.key , 
+                              //  required this.focusTextField
+                              // required this.setMessageText,
+                              required this.selectMessage,
+                              required this.selectedMessageId,
+                              });
   
   @override
   Widget build(BuildContext context) {
@@ -247,7 +279,7 @@ class MessageStreamBuilder extends StatelessWidget {
                     final messageId = msg.id;
                     final text = msg.get('text');
                     final type = msg.get('type');
-
+                    final reply = msg.get('reply');
                     final reactions = msg.get('reactions') ?? []; 
                     print(' reaction is : $reactions'); 
                     
@@ -267,7 +299,9 @@ class MessageStreamBuilder extends StatelessWidget {
                                                       messageId : messageId,
                                                       userId: _auth.currentUser!.uid,
                                                       reactions : reactions,
-                                                      focusTextField: focusTextField,
+                                                      reply : reply,
+                                                      selectMessage: selectMessage,
+                                                      isSelected: messageId == selectedMessageId,
                                                       );
                     messagesWidgets.add(messageWidget);
                     }
