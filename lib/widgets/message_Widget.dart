@@ -2,10 +2,12 @@ import 'dart:ffi';
 
 import 'package:chatapp/services/audio_message_controlle.dart';
 import 'package:chatapp/services/fullScreenImage.dart';
+import 'package:chatapp/services/message_reaction.dart';
 import 'package:chatapp/services/time_service.dart';
 import 'package:chatapp/widgets/reaction_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 
 final _firestore = FirebaseFirestore.instance;
 TimeService _timeService = TimeService();
@@ -20,12 +22,13 @@ class MessageLine extends StatelessWidget {
                      required this.messageId,
                      required this.userId ,
                      required this.reactions,
+                     required this.focusTextField,
                      });
   final String type , voiceMessageTime , text , messageId,userId;
   final bool isMe , showMessage;
   final int time;
   final List reactions;
-  
+  final Function focusTextField;
   
   
   @override
@@ -35,6 +38,9 @@ class MessageLine extends StatelessWidget {
     return GestureDetector(
       onLongPress: (){
        messageReaction.showEmojiOptions(context, messageId , userId , reactions);
+      },
+      onTap : (){
+        focusTextField();
       },
       child: Padding(
         padding: const EdgeInsets.all(8),
@@ -208,50 +214,3 @@ class MessageLine extends StatelessWidget {
     );
   }
 } 
-
-class MessageReaction {
-
- void showEmojiOptions(BuildContext context,String messageId , String userId , List reactions) {
-  showModalBottomSheet(
-    context: context,
-    builder: (context) {
-      return Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          IconButton(onPressed: () => addReaction(messageId , '😴' , userId , reactions ), icon: const Text('😴')),
-          IconButton(onPressed: () => addReaction(messageId , '❤️' , userId , reactions ), icon: const Text('❤️')),
-          IconButton(onPressed: () => addReaction(messageId , '😂' , userId , reactions), icon: const Text('😂')),
-          IconButton(onPressed: () => addReaction(messageId , '🔥' , userId , reactions), icon:  const Text('🔥')),
-          IconButton(onPressed: () => addReaction(messageId , '😢' , userId , reactions), icon: const Text('😢')),
-          
-        ],
-      );
-    },
-  );
-}
-void addReaction(String messageId, String pressedReaction, String userId, List reactions) {
-  bool userFound = false;
-
-  for (var reaction in reactions) {
-    if (reaction['userId'] == userId) {
-      reaction['reaction'] = pressedReaction;  
-      userFound = true;
-      break;  
-    }
-  }
-
-  if (!userFound) {
-    
-    reactions.add({
-      'userId': userId,
-      'reaction': pressedReaction,
-    });
-  }
-
-  
-  _firestore.collection('messages').doc(messageId).update({
-    'reactions': reactions,
-  });
-}
-
-}

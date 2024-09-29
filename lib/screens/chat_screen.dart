@@ -24,6 +24,8 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   final messageTextController = TextEditingController();
+  final GlobalKey<_ChatScreenState> chatScreenKey = GlobalKey<_ChatScreenState>(); 
+  final FocusNode _focusNode = FocusNode();
   
   XFile? pickedImage ;
   String? messageText;
@@ -35,7 +37,12 @@ class _ChatScreenState extends State<ChatScreen> {
   }
   @override
   void dispose() {
+    _focusNode.dispose();
     super.dispose();
+  }
+
+ void _focusTextField() {
+    _focusNode.requestFocus();
   }
 
   @override
@@ -92,7 +99,7 @@ class _ChatScreenState extends State<ChatScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-            const MessageStreamBuilder(),
+            MessageStreamBuilder(focusTextField: _focusTextField),
             Padding(
               padding: const EdgeInsets.symmetric(vertical:20),
               child: Row(
@@ -129,6 +136,7 @@ class _ChatScreenState extends State<ChatScreen> {
                             Expanded(
                                 child: TextField(
                                   controller: messageTextController,
+                                  focusNode: _focusNode,
                                   onChanged: (value) {
                                   messageText = value;
                                 },
@@ -193,8 +201,9 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class MessageStreamBuilder extends StatelessWidget {
-  const MessageStreamBuilder({super.key});
-
+  final Function focusTextField;
+  const MessageStreamBuilder({super.key , required this.focusTextField});
+  
   @override
   Widget build(BuildContext context) {
 
@@ -204,6 +213,7 @@ class MessageStreamBuilder extends StatelessWidget {
               stream: _firestore.collection('messages').orderBy('time').snapshots(), 
               builder: (context , snapshot){
                 List <MessageLine> messagesWidgets = [];
+                
 
                 if (!snapshot.hasData){
                      return const Center(
@@ -257,6 +267,7 @@ class MessageStreamBuilder extends StatelessWidget {
                                                       messageId : messageId,
                                                       userId: _auth.currentUser!.uid,
                                                       reactions : reactions,
+                                                      focusTextField: focusTextField,
                                                       );
                     messagesWidgets.add(messageWidget);
                     }
@@ -267,7 +278,7 @@ class MessageStreamBuilder extends StatelessWidget {
                  return Expanded(
                    child: ListView(
                     reverse: true,
-                    padding: EdgeInsets.symmetric(horizontal: 10 , vertical: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 10 , vertical: 20),
                     children: messagesWidgets,
                    ),
                  );

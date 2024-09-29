@@ -47,7 +47,7 @@ class ReactionWidget extends StatelessWidget {
           const Text('Reactions',
                      style: TextStyle(color: Colors.black , fontSize: 22 , fontWeight: FontWeight.w600), 
                      textAlign: TextAlign.start),
-          SizedBox(height: 20,),
+          const SizedBox(height: 20,),
           Column(
             mainAxisSize: MainAxisSize.min,
             children: reactions.map((reaction) {
@@ -61,16 +61,16 @@ class ReactionWidget extends StatelessWidget {
                       text:'',
                     ),
                   ),
-                  Spacer(),
+                  const Spacer(),
                   Padding(
                     padding: const EdgeInsets.only(right: 10),
-                    child: Text(reaction['reaction'],style: TextStyle(fontSize: 25),),
+                    child: Text(reaction['reaction'],style: const TextStyle(fontSize: 25),),
                   )
                 ],
               );
             }).toList(),
           ),
-          SizedBox(height: 20,),
+          const SizedBox(height: 20,),
         ],
       ),
     );
@@ -99,7 +99,7 @@ class ReactionWidget extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 2),
               child: Text(
                 '${reactions.length}',
-                style: TextStyle(fontWeight: FontWeight.bold),
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
             ]) 
