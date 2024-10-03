@@ -249,13 +249,14 @@ class MessageStreamBuilder extends StatelessWidget {
 
                 if (!snapshot.hasData){
                      return const Center(
-                        child:CircularProgressIndicator() ,
+                        child:CircularProgressIndicator(),
                      );
                 }
+                
                 final messages = snapshot.data!.docs.reversed;
                  
                   for ( var msg in messages){
-
+                    
                   final sender = _auth.currentUser!.uid;
                   late bool noRebuildMessage = true ;
                   List members = [];

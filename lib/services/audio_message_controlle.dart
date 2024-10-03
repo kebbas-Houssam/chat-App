@@ -5,8 +5,8 @@ import 'package:audioplayers/audioplayers.dart';
 
 class AudioMessageBubble extends StatefulWidget {
   final String audioUrl , voiceMessageTime ;
-
-  AudioMessageBubble({required this.audioUrl , required this.voiceMessageTime});
+  
+  AudioMessageBubble({required this.audioUrl , required this.voiceMessageTime });
 
   @override
   _AudioMessageBubbleState createState() => _AudioMessageBubbleState();
