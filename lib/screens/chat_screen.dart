@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:chatapp/screens/groupDetails.dart';
+import 'package:chatapp/services/fullScreenImage.dart';
 import 'package:chatapp/services/image_service.dart';
 import 'package:chatapp/services/voice_message.dart';
 import 'package:chatapp/widgets/group_Widget.dart';
@@ -25,20 +28,47 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final messageTextController = TextEditingController();
   final GlobalKey<_ChatScreenState> chatScreenKey = GlobalKey<_ChatScreenState>(); 
+  final ScrollController _scrollController = ScrollController();
   final FocusNode _focusNode = FocusNode();
   
   XFile? pickedImage ;
   String? messageText;
   String? selectedMessageId;
 
-  //   void _setMessageText(String text, String messageId) {
-  //   setState(() {
-  //     messageText = text;
-  //     messageTextController.text = text;
-  //     selectedMessageId = messageId;
-  //   });
-  //   _focusTextField();
-  // }
+
+  void _scrollToMessage(String messageId) {
+    Future.delayed(Duration(milliseconds: 100), () {
+      final RenderObject? renderObject = _findRenderObject(messageId);
+      if (renderObject != null) {
+        _scrollController.position.ensureVisible(
+          renderObject,
+          alignment: 0.5, 
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      }
+    });
+  }
+
+  RenderObject? _findRenderObject(String messageId) {
+    RenderObject? result;
+    void visitor(Element element) {
+      if (element.widget is MessageLine) {
+        final MessageLine messageLine = element.widget as MessageLine;
+        if (messageLine.messageId == messageId) {
+          result = element.renderObject;
+        } else {
+          element.visitChildren(visitor);
+        }
+      } else {
+        element.visitChildren(visitor);
+      }
+    }
+    (context as Element).visitChildren(visitor);
+    return result;
+  }
+
+
 
   void _selectMessage(String messageId) {
     setState(() {
@@ -117,10 +147,10 @@ class _ChatScreenState extends State<ChatScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
             MessageStreamBuilder(
-              // focusTextField: _focusTextField
-              //  setMessageText: _setMessageText,
                 selectMessage: _selectMessage,
                 selectedMessageId: selectedMessageId,
+                scrollController: _scrollController,
+                scrollToMessage: _scrollToMessage,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical:20),
@@ -128,8 +158,61 @@ class _ChatScreenState extends State<ChatScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    onPressed: () async {
-                        pickedImage = await pickImage();  
+                    onPressed: (){
+                      showModalBottomSheet(
+                          context: context,
+                          builder: (context) {
+                            return  Container(
+                               padding: const EdgeInsets.all(16),
+                              //  width: MediaQuery.of(context).size.width * 0.95,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  _buildMenuItem(context, Icons.camera_alt, 'Camera',(){
+                                    print('camera');
+                                    Navigator.pop(context);
+                                  }),
+
+                                  _buildMenuItem(context, Icons.photo, 'Gallery',() async{
+                                     pickedImage = await pickImage(); 
+                                     Navigator.pop(context);
+                                     Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) => ImagePreviewScreen(
+                                            onPressed: () async {
+                                              _firestore.collection('messages').add({
+                                                'sender': _auth.currentUser!.uid,
+                                                'text': await uploadImage(pickedImage! , 'messageImages'),
+                                                'type' : 'messageImage',       
+                                                'receiver' : data['type'] == 'user' ? [data['id']] : data['members'],
+                                                'time' : FieldValue.serverTimestamp() ,
+                                                'isGroupMessage' : isGroupMessage ,
+                                                'groupeId' : data['id'] ,
+                                                'reactions' : [] ,
+                                                'reply' : selectedMessageId ?? '' ,
+                                              }).whenComplete((){
+                                                 Navigator.pop(context);
+                                                 pickedImage = null;
+                                                 
+                                              });
+                                           },
+                                            imageFile: File(pickedImage!.path)),
+                                        ),);
+                                     
+                                  }),
+                                  _buildMenuItem(context, Icons.insert_drive_file, 'Document',(){
+                                    print('Document');
+                                    Navigator.pop(context);
+                                  }),
+                                  _buildMenuItem(context, Icons.location_on, 'Location',(){
+                                  print('Location');
+                                  Navigator.pop(context);
+                                  }),
+                                ],
+                              ),
+                            );
+                          },
+                        );
                     },
                     icon: const Icon( 
                       Icons.add_circle_outlined,
@@ -155,8 +238,9 @@ class _ChatScreenState extends State<ChatScreen> {
                               isGroupMessage: isGroupMessage, 
                               groupeId: data['id'] as String,
                               reply : selectedMessageId ?? ''),
-                    
+                           
                             Expanded(
+                                
                                 child: TextField(
                                   controller: messageTextController,
                                   focusNode: _focusNode,
@@ -225,101 +309,168 @@ class _ChatScreenState extends State<ChatScreen> {
 }
 
 class MessageStreamBuilder extends StatelessWidget {
-  // final Function focusTextField;
-  // final Function(String, String) setMessageText;
   final Function(String) selectMessage;
   final String? selectedMessageId;
-  const MessageStreamBuilder({super.key , 
-                              //  required this.focusTextField
-                              // required this.setMessageText,
-                              required this.selectMessage,
-                              required this.selectedMessageId,
-                              });
+  final ScrollController scrollController;
+  final Function(String) scrollToMessage;
+
+  const MessageStreamBuilder({
+    Key? key,
+    required this.selectMessage,
+    required this.selectedMessageId,
+    required this.scrollController,
+    required this.scrollToMessage,
+  }) : super(key: key);
   
   @override
   Widget build(BuildContext context) {
+    final data = Provider.of<Map<String, dynamic>>(context);
 
-    final data = Provider.of<Map <String ,dynamic >>(context);
+    return StreamBuilder<QuerySnapshot>(
+      stream: _firestore.collection('messages').orderBy('time').snapshots(),
+      builder: (context, snapshot) {
+        List<MessageLine> messagesWidgets = [];
 
-    return   StreamBuilder<QuerySnapshot>(
-              stream: _firestore.collection('messages').orderBy('time').snapshots(), 
-              builder: (context , snapshot){
-                List <MessageLine> messagesWidgets = [];
-                
+        if (!snapshot.hasData) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        }
+        
+        final messages = snapshot.data!.docs.reversed;
+        final sender = _auth.currentUser!.uid;
+        List members = [];
+        
+        if (data['type'] == 'user') {
+          members.add(data['id']);
+        } else {
+          members.addAll(data['members']);
+        }
 
-                if (!snapshot.hasData){
-                     return const Center(
-                        child:CircularProgressIndicator(),
-                     );
-                }
-                
-                final messages = snapshot.data!.docs.reversed;
-                 
-                  for ( var msg in messages){
-                    
-                  final sender = _auth.currentUser!.uid;
-                  late bool noRebuildMessage = true ;
-                  List members = [];
-                 
-                  if (data['type'] == 'user' ) {
-                    members.add(data['id'])  ;
-                  } else {
-                    members .addAll(data['members']);
-                  }
+        for (var msg in messages) {
+          late bool noRebuildMessage = true;
+          final List receivers = msg.get('receiver');
 
-                  final List receivers = msg.get('receiver');
-
-                  for (var member in members){
-                    if (receivers.isNotEmpty){
-                      
-                      for(var receiver in receivers ){
-                    
-
-                    if (((sender == msg.get('sender') && member == receiver && noRebuildMessage) || ((sender == receiver && member == msg.get('sender')))) && (data['id'] == msg.get('groupeId')  || data['type'] == 'user')){
-                    noRebuildMessage = false;
-                    final messageId = msg.id;
-                    final text = msg.get('text');
-                    final type = msg.get('type');
-                    final reply = msg.get('reply');
-                    final reactions = msg.get('reactions') ?? []; 
-                    print(' reaction is : $reactions'); 
-                    
-                    int time =  msg.get('time') != null ? msg.get('time').millisecondsSinceEpoch
-                                                       : DateTime.now().millisecondsSinceEpoch ;
-                    
-                    final voiceMessageTime = type == 'audio' ?msg.get('voiceMessageTime') : '';           
-                    final bool showMessage = ( msg.get('isGroupMessage') && data['type'] == 'group') 
-                                            || (!msg.get('isGroupMessage') && data['type'] == 'user') ;
-                    
-                    final messageWidget = MessageLine(text: text,
-                                                      isMe: sender == msg.get('sender'),
-                                                      showMessage: showMessage,
-                                                      type : type , 
-                                                      time:  time ,
-                                                      voiceMessageTime : voiceMessageTime ,
-                                                      messageId : messageId,
-                                                      userId: _auth.currentUser!.uid,
-                                                      reactions : reactions,
-                                                      reply : reply,
-                                                      selectMessage: selectMessage,
-                                                      isSelected: messageId == selectedMessageId,
-                                                      );
-                    messagesWidgets.add(messageWidget);
-                    }
-                  }
+          for (var member in members) {
+            if (receivers.isNotEmpty) {
+              for (var receiver in receivers) {
+                if (((sender == msg.get('sender') && member == receiver && noRebuildMessage) || 
+                    ((sender == receiver && member == msg.get('sender')))) && 
+                    (data['id'] == msg.get('groupeId') || data['type'] == 'user')) {
+                  noRebuildMessage = false;
+                  final messageId = msg.id;
+                  final text = msg.get('text');
+                  final type = msg.get('type');
+                  final reply = msg.get('reply');
+                  final reactions = msg.get('reactions') ?? [];
+                  
+                  int time = msg.get('time') != null 
+                      ? msg.get('time').millisecondsSinceEpoch
+                      : DateTime.now().millisecondsSinceEpoch;
+                  
+                  final voiceMessageTime = type == 'audio' ? msg.get('voiceMessageTime') : '';
+                  final bool showMessage = (msg.get('isGroupMessage') && data['type'] == 'group') || 
+                                           (!msg.get('isGroupMessage') && data['type'] == 'user');
+                  
+                  final messageWidget = MessageLine(
+                    text: text,
+                    isMe: sender == msg.get('sender'),
+                    showMessage: showMessage,
+                    type: type,
+                    time: time,
+                    voiceMessageTime: voiceMessageTime,
+                    messageId: messageId,
+                    userId: _auth.currentUser!.uid,
+                    reactions: reactions,
+                    reply: reply,
+                    selectMessage: selectMessage,
+                    isSelected: messageId == selectedMessageId,
+                    onReplyTap: () => scrollToMessage(reply),
+                  );
+                  messagesWidgets.add(messageWidget);
                 }
               }
             }
-                 return Expanded(
-                   child: ListView(
-                    reverse: true,
-                    padding: const EdgeInsets.symmetric(horizontal: 10 , vertical: 20),
-                    children: messagesWidgets,
-                   ),
-                 );
-              },
-              );
+          }
+        }
+
+        return Expanded(
+          child: ListView.builder(
+            reverse: true,
+            controller: scrollController,
+            itemCount: messagesWidgets.length,
+            itemBuilder: (context, index) {
+            final messageWidget = messagesWidgets[index];
+            return messageWidget;
+            }
+            
+          ),
+        );
+      },
+    );
   }
 }
 
+Widget _buildMenuItem(BuildContext context, IconData icon, String label,VoidCallback onPressed ){
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 15),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: <Widget>[
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: Colors.black,
+            child: IconButton(
+              icon: Icon(icon, size: 24, color: Colors.white),
+              onPressed: onPressed
+              ),
+          ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+        ],
+      ),
+    );
+  }
 
+
+class ImagePreviewScreen extends StatelessWidget {
+  final File imageFile;
+  final VoidCallback onPressed;
+  ImagePreviewScreen({required this.imageFile , required this.onPressed});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Image.file(imageFile),
+        Align(
+          alignment: Alignment.bottomRight,
+          child: Padding(
+            padding: EdgeInsets.all(30),
+            child: CircleAvatar(
+              radius: 35,
+              backgroundColor: Colors.black,
+              child: Center(
+                child: IconButton(
+                  onPressed: onPressed,
+                  icon: const Icon(Icons.send ,size: 30, color: Colors.white,)))),
+          )),
+          Align(
+          alignment: Alignment.bottomLeft,
+          child: Padding(
+            padding: EdgeInsets.all(30),
+            child: CircleAvatar(
+              radius: 35,
+              backgroundColor: Colors.red[700],
+              child: Center(
+                child: IconButton(
+                  onPressed: (){
+                    Navigator.pop(context);
+                  }, 
+                  icon: const Icon(Icons.close ,size: 30, color: Colors.white,)))),
+          ))
+      ],
+    );
+  }
+}

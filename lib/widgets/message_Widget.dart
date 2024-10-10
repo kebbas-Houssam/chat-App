@@ -26,12 +26,13 @@ class MessageLine extends StatelessWidget {
                      required this.selectMessage,
                      required this.isSelected,
                      required this.reply,
+                     required this.onReplyTap
                      });
   final String type , voiceMessageTime , text , messageId,userId , reply;
   final bool isMe , showMessage, isSelected;
   final int time;
   final List reactions;
-  
+  final VoidCallback onReplyTap;
   final Function(String) selectMessage;
   
   
@@ -50,7 +51,9 @@ class MessageLine extends StatelessWidget {
           crossAxisAlignment: isMe ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
              const SizedBox(height: 5,) ,
-            reply != ''  ? ReplayService(replyMessageId: reply) 
+            reply != ''  ? GestureDetector(
+              onTap: onReplyTap,
+              child: ReplayService(replyMessageId: reply)) 
                          : const SizedBox.shrink(),
             Row(
               mainAxisAlignment: isMe ?MainAxisAlignment.end : MainAxisAlignment.start,
@@ -61,7 +64,7 @@ class MessageLine extends StatelessWidget {
                         onPressed: () => selectMessage(messageId),
                         icon: const Icon(Icons.reply_rounded, size: 22, color: Colors.black),
                       ),
-                SizedBox(width: 5,),
+                const SizedBox(width: 5,),
                 Wrap(
                   children: [
                   Stack(
@@ -224,7 +227,7 @@ class MessageLine extends StatelessWidget {
                   ),
                   ]
                 ),
-                SizedBox(width: 5,),
+                const SizedBox(width: 5,),
                 if (!isMe)
                       IconButton(
                         onPressed: () => selectMessage(messageId),
