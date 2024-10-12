@@ -63,9 +63,9 @@ class _UserActiveWidgetState extends State<UserActiveWidget> {
     return StreamBuilder<DocumentSnapshot>(
       stream: _firestore.collection('users').doc(_auth.currentUser!.uid).snapshots(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Sckelton2(raduis: 60);
-        }
+        // if (snapshot.connectionState == ConnectionState.waiting) {
+        //   return Sckelton2(raduis: 60);
+        // }
 
         if (snapshot.hasError) {
           
@@ -76,10 +76,10 @@ class _UserActiveWidgetState extends State<UserActiveWidget> {
           print('No data found');
         }
 
-        final List userFriends = snapshot.data!['friends'];
-
+        final List? userFriends = snapshot.data?['friends'];
+        if (userFriends != null ){
         return FutureBuilder<List<Widget>>(
-          future: _getActiveUsers(userFriends),
+          future: _getActiveUsers(userFriends ),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Row(
@@ -96,6 +96,7 @@ class _UserActiveWidgetState extends State<UserActiveWidget> {
                 ],
               );
             }
+          
 
             if (snapshot.hasError) {
               
@@ -111,7 +112,9 @@ class _UserActiveWidgetState extends State<UserActiveWidget> {
               children: snapshot.data!,
             );
           },
-        );
+        );}
+        else 
+        return Text("you don't have any friends");
       },
     );
   }

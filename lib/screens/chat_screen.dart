@@ -19,7 +19,6 @@ final _auth = FirebaseAuth.instance;
 
 class ChatScreen extends StatefulWidget {
 
-  // ignore: constant_identifier_names
   static const String ScreenRoute = 'chat_screen';
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -92,10 +91,26 @@ class _ChatScreenState extends State<ChatScreen> {
     _focusNode.requestFocus();
   }
 
+  Future<void> sendMessage(Map<String, dynamic> data,String type ,String text, bool isGroupMessage, String? selectedMessageId) async {
+  messageTextController.clear();
+  List<String> receivers;
+
+    await _firestore.collection('messages').add({
+      'sender': _auth.currentUser!.uid,
+      'text': text,
+      'type': type,
+      'receiver': data['type'] == 'user' ? [data['id']] : data['members'],
+      'time': FieldValue.serverTimestamp(),
+      'isGroupMessage': isGroupMessage,
+      'groupeId': data['id'],
+      'reactions': [],
+      'reply': selectedMessageId ?? '',
+    }); 
+}
+
+
   @override
     Widget build(BuildContext context) {
-     
-
     
     final Map <String , dynamic > data = ModalRoute.of(context)!.settings.arguments as Map <String , dynamic>;
     
@@ -173,33 +188,29 @@ class _ChatScreenState extends State<ChatScreen> {
                                     Navigator.pop(context);
                                   }),
 
-                                  _buildMenuItem(context, Icons.photo, 'Gallery',() async{
-                                     pickedImage = await pickImage(); 
-                                     Navigator.pop(context);
-                                     Navigator.of(context).push(
+                                  _buildMenuItem(context, Icons.photo, 'Gallery', () async {
+                                    pickedImage = await pickImage(); 
+                                    if (pickedImage != null) {
+                                      Navigator.of(context).push(
                                         MaterialPageRoute(
                                           builder: (_) => ImagePreviewScreen(
                                             onPressed: () async {
-                                              _firestore.collection('messages').add({
-                                                'sender': _auth.currentUser!.uid,
-                                                'text': await uploadImage(pickedImage! , 'messageImages'),
-                                                'type' : 'messageImage',       
-                                                'receiver' : data['type'] == 'user' ? [data['id']] : data['members'],
-                                                'time' : FieldValue.serverTimestamp() ,
-                                                'isGroupMessage' : isGroupMessage ,
-                                                'groupeId' : data['id'] ,
-                                                'reactions' : [] ,
-                                                'reply' : selectedMessageId ?? '' ,
-                                              }).whenComplete((){
-                                                 Navigator.pop(context);
-                                                 pickedImage = null;
-                                                 
-                                              });
-                                           },
-                                            imageFile: File(pickedImage!.path)),
-                                        ),);
-                                     
-                                  }),
+                                              if (pickedImage != null) {
+                                                Navigator.pop(context) ;
+                                                Navigator.pop(context) ;
+                                                String imageUrl = await uploadImage(pickedImage!, 'messageImages');
+                                                await sendMessage(data, 'messageImage', imageUrl, isGroupMessage, selectedMessageId);
+                                                pickedImage = null;
+                                                
+                                              }
+                                            },
+                                            imageFile: File(pickedImage!.path),
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                   }),
+
                                   _buildMenuItem(context, Icons.insert_drive_file, 'Document',(){
                                     print('Document');
                                     Navigator.pop(context);
@@ -261,35 +272,12 @@ class _ChatScreenState extends State<ChatScreen> {
                    
                    IconButton(
                      onPressed: () async {
-                       messageTextController.clear();
-                       List receivers; 
-                       if ((messageText!= null && messageText!.isNotEmpty  )||  pickedImage != null ) {
-                         
-                      _firestore.collection('messages').add({
-                         'sender': _auth.currentUser!.uid,
-                         'text': pickedImage == null 
-                                 ? messageText
-                                 : await uploadImage(pickedImage! , 'messageImages'),
-                                 
-                         'type' : pickedImage == null 
-                                  ? 'messageText' 
-                                  : 'messageImage',       
-                         'receiver' : data['type'] == 'user' ? [data['id']] : data['members'],
-                         'time' : FieldValue.serverTimestamp() ,
-                         'isGroupMessage' : isGroupMessage ,
-                         'groupeId' : data['id'] ,
-                         'reactions' : [] ,
-                         'reply' : selectedMessageId ?? '' ,
-                       }).whenComplete((){
-                          pickedImage = null;
-                          messageText = null;
-                       });
-                       
-                     
-                    } else if (pickedImage == null){
-                    
-                    }
-                       
+                      if (messageText != null && messageText!.isNotEmpty){
+                       sendMessage(data, 'messageText', messageText as String, isGroupMessage, selectedMessageId)
+                       .whenComplete((){
+                        messageText = null;
+                       });      
+                      } 
                      },
                      icon: const Icon(
                        Icons.send_rounded,
